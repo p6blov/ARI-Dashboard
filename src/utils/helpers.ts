@@ -27,6 +27,7 @@ export function formatDate(dateStr: string): string {
   if (!dateStr) return 'N/A';
   
   try {
+    // Handle MM-DD-YYYY format from iOS app
     const mmddyyyyRegex = /^(\d{2})-(\d{2})-(\d{4})$/;
     const match = dateStr.match(mmddyyyyRegex);
     
@@ -43,6 +44,7 @@ export function formatDate(dateStr: string): string {
       }
     }
     
+    // Try standard date parsing
     const date = new Date(dateStr);
     if (isNaN(date.getTime())) return dateStr;
     
@@ -58,14 +60,17 @@ export function formatDate(dateStr: string): string {
 
 /**
  * Convert date string to YYYY-MM-DD format for input fields
+ * Handles both ISO format and MM-DD-YYYY format from iOS
  */
 export function toInputDateFormat(dateStr: string): string {
   if (!dateStr) return '';
   
+  // Check if already in YYYY-MM-DD format
   if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
     return dateStr;
   }
   
+  // Handle MM-DD-YYYY format from iOS app
   const mmddyyyyRegex = /^(\d{2})-(\d{2})-(\d{4})$/;
   const match = dateStr.match(mmddyyyyRegex);
   
@@ -74,6 +79,7 @@ export function toInputDateFormat(dateStr: string): string {
     return `${year}-${month}-${day}`;
   }
   
+  // Try to parse as standard date
   try {
     const date = new Date(dateStr);
     if (!isNaN(date.getTime())) {
@@ -139,42 +145,84 @@ export function getSupplierNameFromUrl(url: string): string {
   if (!url) return 'Unknown Supplier';
 
   try {
+    // Parse URL
     const urlObj = new URL(url);
     const hostname = urlObj.hostname.toLowerCase();
+
+    // Remove www. prefix
     const cleanHostname = hostname.replace(/^www\./, '');
 
+    // Known supplier mappings
     const supplierMappings: { [key: string]: string } = {
+      // Amazon variants
       'amazon.com': 'Amazon',
+      'amazon.ca': 'Amazon',
+      'amazon.co.uk': 'Amazon',
+      'amazon.de': 'Amazon',
+      'amazon.fr': 'Amazon',
+      'amazon.co.jp': 'Amazon',
       'a.co': 'Amazon',
       'amzn.to': 'Amazon',
+      'amzn.com': 'Amazon',
+      
+      // Major retailers
       'ebay.com': 'eBay',
+      'ebay.co.uk': 'eBay',
       'walmart.com': 'Walmart',
       'target.com': 'Target',
+      'costco.com': 'Costco',
       'homedepot.com': 'Home Depot',
       'lowes.com': "Lowe's",
+      'bestbuy.com': 'Best Buy',
+      
+      // Industrial suppliers
       'grainger.com': 'Grainger',
       'mcmaster.com': 'McMaster-Carr',
       'uline.com': 'Uline',
+      'fastenal.com': 'Fastenal',
+      'mscdirect.com': 'MSC Industrial',
+      
+      // International
       'alibaba.com': 'Alibaba',
       'aliexpress.com': 'AliExpress',
+      'banggood.com': 'Banggood',
+      
+      // Electronics
       'newegg.com': 'Newegg',
-      'bestbuy.com': 'Best Buy',
+      'microcenter.com': 'Micro Center',
+      'mouser.com': 'Mouser',
+      'digikey.com': 'Digi-Key',
+      'sparkfun.com': 'SparkFun',
+      'adafruit.com': 'Adafruit',
+      'pololu.com': 'Pololu',
+      'robotshop.com': 'RobotShop',
+      'servocity.com': 'ServoCity',
+      
+      // Specialty
+      'rcdrone.top': 'RC Drone',
+      'hobbyking.com': 'HobbyKing',
+      'getfpv.com': 'GetFPV',
+      'racedayquads.com': 'RaceDayQuads',
     };
 
+    // Check known suppliers
     for (const [domain, name] of Object.entries(supplierMappings)) {
       if (cleanHostname === domain || cleanHostname.endsWith('.' + domain)) {
         return name;
       }
     }
 
+    // Extract main domain name (remove TLD)
     const parts = cleanHostname.split('.');
     if (parts.length >= 2) {
       const mainName = parts[parts.length - 2];
+      // Capitalize first letter
       return mainName.charAt(0).toUpperCase() + mainName.slice(1);
     }
 
     return cleanHostname;
   } catch {
+    // If URL parsing fails, return the original string
     return url;
   }
 }
@@ -192,78 +240,61 @@ export function isSameSupplier(url1: string, url2: string): boolean {
 }
 
 /**
- * Extract trailing number from a location string like "cab1", "row2", "col3"
+ * Parse location string to structured format
+ * Example: "cab1-row2-col3" -> { cabinet: 1, row: 2, col: 3 }
  */
-export function extractLocationNumber(str: string): string {
-  const match = str.match(/(\d+)$/);
-  return match ? match[1] : str;
+export function parseLocation(locationStr: string): { cabinet: number; row: number; col: number } | null {
+  const match = locationStr.match(/cab(\d+)-row(\d+)-col(\d+)/i);
+  if (!match) return null;
+  
+  return {
+    cabinet: parseInt(match[1]),
+    row: parseInt(match[2]),
+    col: parseInt(match[3]),
+  };
 }
 
 /**
- * Parse location array (new format: ["cab1", "row2", "col3"])
- * Also supports legacy single-string format: "cab1-row2-col3"
- * Returns { cabinet, row, col } as strings, or null if unparseable
+ * Get display text for location
+ * Example: "cab1-row2-col3" -> { cabinet: "1", row: "2", col: "3" }
  */
-export function parseLocation(locationData: string | string[]): { cabinet: string; row: string; col: string } | null {
-  // New format: array of 3 strings
-  if (Array.isArray(locationData) && locationData.length === 3) {
-    return {
-      cabinet: extractLocationNumber(locationData[0]),
-      row: extractLocationNumber(locationData[1]),
-      col: extractLocationNumber(locationData[2]),
-    };
-  }
-
-  // Legacy single-string format: "cab1-row2-col3"
-  const str = Array.isArray(locationData) ? locationData[0] : locationData;
-  if (!str) return null;
-
-  const match = str.match(/cab(\d+)-row(\d+)-col(\d+)/i);
-  if (match) {
-    return {
-      cabinet: match[1],
-      row: match[2],
-      col: match[3],
-    };
-  }
-
-  // Try parsing individual segment like "cab1"
-  const cabMatch = str.match(/cab(\d+)/i);
-  const rowMatch = str.match(/row(\d+)/i);
-  const colMatch = str.match(/col(\d+)/i);
-  if (cabMatch || rowMatch || colMatch) {
-    return {
-      cabinet: cabMatch ? cabMatch[1] : '-',
-      row: rowMatch ? rowMatch[1] : '-',
-      col: colMatch ? colMatch[1] : '-',
-    };
-  }
-
-  return null;
+export function getLocationDisplay(locationStr: string): { cabinet: string; row: string; col: string } | null {
+  const parsed = parseLocation(locationStr);
+  if (!parsed) return null;
+  
+  return {
+    cabinet: parsed.cabinet.toString(),
+    row: parsed.row.toString(),
+    col: parsed.col.toString(),
+  };
 }
 
 /**
- * Build the 3-element location array from cabinet/row/col numbers
- * Returns ["cab1", "row2", "col3"]
+ * Extract unique cabinets from an item's location array
+ * Returns array of cabinet numbers
  */
-export function buildLocationArray(cabinet: number, row: number, col: number): string[] {
-  return [`cab${cabinet}`, `row${row}`, `col${col}`];
+export function getCabinetsFromLocations(locations: string[]): number[] {
+  const cabinets = new Set<number>();
+  
+  locations.forEach(loc => {
+    const parsed = parseLocation(loc);
+    if (parsed) {
+      cabinets.add(parsed.cabinet);
+    }
+  });
+  
+  return Array.from(cabinets).sort((a, b) => a - b);
 }
 
 /**
- * Get display values for a location array (new format)
- * Returns { cabinet, row, col } as display strings
- */
-export function getLocationDisplay(locationData: string | string[]): { cabinet: string; row: string; col: string } | null {
-  return parseLocation(locationData);
-}
-
-/**
- * Format location array for display as a human-readable string
+ * Format a location array ["cab1", "row2", "col3"] into "Cab 1 · Row 2 · Col 3"
  */
 export function formatLocationLabel(location: string[]): string {
-  if (!location || location.length === 0) return '';
-  const parsed = parseLocation(location);
-  if (!parsed) return location.join(', ');
-  return `Cab ${parsed.cabinet} · Row ${parsed.row} · Col ${parsed.col}`;
+  if (!location || location.length !== 3) return location?.join(' ') ?? '';
+
+  const cab = location[0].replace(/\D/g, '');
+  const row = location[1].replace(/\D/g, '');
+  const col = location[2].replace(/\D/g, '');
+
+  return `Cab ${cab} · Row ${row} · Col ${col}`;
 }

@@ -1,9 +1,8 @@
 import React from 'react';
-import { buildLocationArray } from '../utils/helpers';
 
 interface LocationPickerProps {
-  onLocationAdd: (locationArray: string[]) => void;
-  existingLocations: string[][];
+  onLocationAdd: (cabinet: number, row: number, col: number) => void;
+  existingLocations: string[];
 }
 
 export const LocationPicker: React.FC<LocationPickerProps> = ({
@@ -15,14 +14,24 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
   const [col, setCol] = React.useState<number>(1);
 
   const handleAdd = () => {
-    const locationArr = buildLocationArray(cabinet, row, col);
-    // Avoid duplicates by comparing serialized form
-    const key = locationArr.join('-');
-    const isDuplicate = existingLocations.some(
-      (loc) => Array.isArray(loc) && loc.join('-') === key
-    );
-    if (!isDuplicate) {
-      onLocationAdd(locationArr);
+    // Check if this location already exists
+    // Locations are stored as flat array: ["cab1", "row2", "col3", "cab2", "row1", "col4"]
+    // So we check every group of 3
+    const locationExists = Array.from({ length: existingLocations.length / 3 }).some((_, idx) => {
+      const startIdx = idx * 3;
+      const existingCab = existingLocations[startIdx];
+      const existingRow = existingLocations[startIdx + 1];
+      const existingCol = existingLocations[startIdx + 2];
+      
+      return (
+        existingCab === `cab${cabinet}` &&
+        existingRow === `row${row}` &&
+        existingCol === `col${col}`
+      );
+    });
+    
+    if (!locationExists) {
+      onLocationAdd(cabinet, row, col);
     }
   };
 

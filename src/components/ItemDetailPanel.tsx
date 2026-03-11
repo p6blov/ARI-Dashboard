@@ -3,20 +3,23 @@ import { Item, ItemPatch } from '../types/item';
 import { itemsRepository } from '../services/itemsRepository';
 import { checkoutItem } from '../services/checkoutService';
 import { useAuth } from '../contexts/AuthContext';
-import { formatPrice, formatDate, toInputDateFormat, toStorageDateFormat, formatLocationLabel } from '../utils/helpers';
+import { formatPrice, formatDate, toInputDateFormat, toStorageDateFormat } from '../utils/helpers';
 import { LocationPicker } from './LocationPicker';
 import { BarcodeModal } from './BarcodeModal';
+import { PlanogramModal } from './PlanogramModal';
 
 interface ItemDetailPanelProps {
   item: Item;
   onClose: () => void;
   onUpdate: () => void;
+  allItems?: Item[];
 }
 
 export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
   item,
   onClose,
   onUpdate,
+  allItems = [],
 }) => {
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
@@ -28,6 +31,10 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
   const [showBarcode, setShowBarcode] = useState(false);
+  
+  // Planogram state
+  const [showPlanogram, setShowPlanogram] = useState(false);
+  const [selectedCabinet, setSelectedCabinet] = useState(1);
 
   useEffect(() => {
     setEditedItem({
@@ -122,13 +129,6 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
     }
   };
 
-  const removeLocation = (index: number) => {
-    setEditedItem({
-      ...editedItem,
-      location: editedItem.location.filter((_, i) => i !== index),
-    });
-  };
-
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
       if (isEditing) handleCancel();
@@ -138,26 +138,18 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
     }
   };
 
-  // Render a location entry — handles both ["cab1","row2","col3"] and legacy "cab1-row2-col3"
-  const renderLocationTag = (loc: any, idx: number, removable = false) => {
-    const label = Array.isArray(loc) ? formatLocationLabel(loc) : loc;
-    return (
-      <span
-        key={idx}
-        className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-200"
-      >
-        {label}
-        {removable && (
-          <button
-            onClick={() => removeLocation(idx)}
-            className="ml-2 text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-100"
-          >
-            ×
-          </button>
-        )}
-      </span>
-    );
+  // Format a location triplet from the flat array into a readable label
+  // location is ['cab1', 'row2', 'col3'] — strip non-digits from each element
+  const formatLocationGroup = (startIdx: number) => {
+    const cab = item.location[startIdx]?.replace(/\D/g, '');
+    const row = item.location[startIdx + 1]?.replace(/\D/g, '');
+    const col = item.location[startIdx + 2]?.replace(/\D/g, '');
+    return `Cab ${cab} · Row ${row} · Col ${col}`;
   };
+
+  // Cabinet number is just the digits from index 0 of the location array
+  const cabinetNumber = Number(item.location?.[0]?.replace(/\D/g, '') ?? 0);
+  const hasLocation = item.location?.length >= 3;
 
   return (
     <div
@@ -168,6 +160,23 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-black">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Item Details</h2>
         <div className="flex items-center space-x-2">
+          {/* Planogram Button - visible when item has a valid location */}
+          {hasLocation && (
+            <button
+              onClick={() => {
+                setSelectedCabinet(cabinetNumber);
+                setShowPlanogram(true);
+              }}
+              className="p-2 hover:bg-gray-200 dark:hover:bg-cyan-500/10 rounded-lg transition-colors group"
+              title="View Planogram"
+            >
+              <svg className="w-5 h-5 text-gray-700 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h4a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM14 13a1 1 0 011-1h4a1 1 0 011 1v6a1 1 0 01-1 1h-4a1 1 0 01-1-1v-6z" />
+              </svg>
+            </button>
+          )}
+          
+          {/* Barcode Button */}
           <button
             onClick={() => setShowBarcode(true)}
             className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg transition-colors"
@@ -177,6 +186,8 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
             </svg>
           </button>
+          
+          {/* Close Button */}
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg transition-colors"
@@ -235,22 +246,34 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
             {isEditing ? (
               <div className="space-y-2">
                 <LocationPicker
-                  onLocationAdd={(locArr) => {
+                  onLocationAdd={(cab, row, col) => {
                     setEditedItem({
                       ...editedItem,
-                      location: [...editedItem.location, locArr as any],
+                      location: [`cab${cab}`, `row${row}`, `col${col}`],
                     });
                   }}
-                  existingLocations={editedItem.location as any}
+                  existingLocations={editedItem.location}
                 />
                 <div className="flex flex-wrap gap-2">
-                  {editedItem.location.map((loc, idx) => renderLocationTag(loc, idx, true))}
+                  {editedItem.location.length >= 3 && (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-200">
+                      {formatLocationGroup(0)}
+                      <button
+                        onClick={() => setEditedItem({ ...editedItem, location: [] })}
+                        className="ml-2 text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-100"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
                 </div>
               </div>
             ) : (
               <div className="flex flex-wrap gap-2">
-                {item.location.length > 0 ? (
-                  item.location.map((loc, idx) => renderLocationTag(loc, idx))
+                {hasLocation ? (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-200">
+                    {formatLocationGroup(0)}
+                  </span>
                 ) : (
                   <span className="text-gray-500 dark:text-gray-400">N/A</span>
                 )}
@@ -396,7 +419,7 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
               <button
                 onClick={handleCheckout}
                 disabled={isCheckingOut || (editedItem.on_hand ?? 0) <= 0}
-                className="btn-primary"
+                className="btn-primary px-6 py-2"
               >
                 {isCheckingOut ? 'Checking out...' : 'Check Out'}
               </button>
@@ -435,12 +458,23 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
         )}
       </div>
 
+      {/* Barcode Modal */}
       {showBarcode && (
         <BarcodeModal
           itemId={item.id}
           itemName={item.name}
           isOpen={showBarcode}
           onClose={() => setShowBarcode(false)}
+        />
+      )}
+      
+      {/* Planogram Modal */}
+      {showPlanogram && (
+        <PlanogramModal
+          cabinet={selectedCabinet}
+          items={allItems}
+          isOpen={showPlanogram}
+          onClose={() => setShowPlanogram(false)}
         />
       )}
     </div>
