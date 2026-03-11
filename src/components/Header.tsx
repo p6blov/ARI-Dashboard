@@ -19,7 +19,7 @@ export const Header: React.FC<HeaderProps> = ({
   onCSVImport, 
   isConnected = true 
 }) => {
-  const { user, logOut } = useAuth();
+  const { user: _user, logOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);

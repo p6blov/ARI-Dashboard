@@ -1,5 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 
+declare const QRCode: {
+  new (el: HTMLElement, options: object): void;
+  CorrectLevel: { H: number; Q: number; M: number; L: number };
+};
+
 interface QRCodeModalProps {
   itemId: string;
   itemName: string;
@@ -13,21 +18,20 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  // QRCode library renders into a div container, not a canvas directly
+  const canvasRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isOpen || !canvasRef.current) return;
 
-    // Generate QR code using qrcode library from CDN
     const script = document.createElement('script');
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
     script.onload = () => {
       if (canvasRef.current) {
         // Clear previous QR code
         canvasRef.current.innerHTML = '';
-        
+
         // Generate new QR code
-        // @ts-ignore - QRCode loaded from CDN
         new QRCode(canvasRef.current, {
           text: itemId,
           width: 256,
@@ -53,10 +57,9 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({
     const canvas = canvasRef.current.querySelector('canvas');
     if (!canvas) return;
 
-    // Convert canvas to blob and download
     canvas.toBlob((blob) => {
       if (!blob) return;
-      
+
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;

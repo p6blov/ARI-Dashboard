@@ -24,7 +24,7 @@ export const ItemsTable: React.FC<ItemsTableProps> = ({
   
   // Planogram modal state
   const [showPlanogram, setShowPlanogram] = useState(false);
-  const [selectedCabinet, setSelectedCabinet] = useState(1);
+  const [selectedCabinet, _setSelectedCabinet] = useState(1);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {

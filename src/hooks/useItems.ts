@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Item } from '../types/item';
 import { itemsRepository } from '../services/itemsRepository';
-import { debounce, isSameSupplier } from '../utils/helpers';
+import { isSameSupplier } from '../utils/helpers';
 
 export interface FilterState {
   search: string;

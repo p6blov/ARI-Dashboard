@@ -27,7 +27,7 @@ export const CSVImportModal: React.FC<CSVImportModalProps> = ({
   const [errorRows, setErrorRows] = useState<CSVError[]>([]);
   const [imported, setImported] = useState(0);
 
-  const validateRow = (row: any, rowIndex: number): { valid: boolean; errors: string[]; item?: ItemDraft } => {
+  const validateRow = (row: any, _rowIndex: number): { valid: boolean; errors: string[]; item?: ItemDraft } => {
     const errors: string[] = [];
 
     // Required fields

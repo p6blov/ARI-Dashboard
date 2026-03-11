@@ -129,12 +129,7 @@ export const NewItemModal: React.FC<NewItemModalProps> = ({
     onClose();
   };
 
-  const removeLocation = (index: number) => {
-    setFormData({
-      ...formData,
-      location: formData.location.filter((_, i) => i !== index),
-    });
-  };
+
 
   if (!isOpen) return null;
 

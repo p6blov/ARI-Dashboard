@@ -55,6 +55,24 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
     }
   }, [triggerCSVImport]);
 
+  // Reset all modal states when component unmounts (user switches views)
+  useEffect(() => {
+    return () => {
+      setSelectedItem(null);
+      setIsNewItemModalOpen(false);
+      setIsCSVImportOpen(false);
+    };
+  }, []);
+
+  // Reset all modal states when component unmounts (user switches views)
+  useEffect(() => {
+    return () => {
+      setSelectedItem(null);
+      setIsNewItemModalOpen(false);
+      setIsCSVImportOpen(false);
+    };
+  }, []);
+
   const handleItemClick = (item: Item) => {
     setSelectedItem(item);
   };
@@ -170,6 +188,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           item={selectedItem}
           onClose={handleCloseDetail}
           onUpdate={handleUpdate}
+          allItems={items}
         />
       )}
 
