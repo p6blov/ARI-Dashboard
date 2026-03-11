@@ -239,52 +239,6 @@ export function isSameSupplier(url1: string, url2: string): boolean {
   return name1.toLowerCase() === name2.toLowerCase();
 }
 
-/**
- * Parse location string to structured format
- * Example: "cab1-row2-col3" -> { cabinet: 1, row: 2, col: 3 }
- */
-export function parseLocation(locationStr: string): { cabinet: number; row: number; col: number } | null {
-  const match = locationStr.match(/cab(\d+)-row(\d+)-col(\d+)/i);
-  if (!match) return null;
-  
-  return {
-    cabinet: parseInt(match[1]),
-    row: parseInt(match[2]),
-    col: parseInt(match[3]),
-  };
-}
-
-/**
- * Get display text for location
- * Example: "cab1-row2-col3" -> { cabinet: "1", row: "2", col: "3" }
- */
-export function getLocationDisplay(locationStr: string): { cabinet: string; row: string; col: string } | null {
-  const parsed = parseLocation(locationStr);
-  if (!parsed) return null;
-  
-  return {
-    cabinet: parsed.cabinet.toString(),
-    row: parsed.row.toString(),
-    col: parsed.col.toString(),
-  };
-}
-
-/**
- * Extract unique cabinets from an item's location array
- * Returns array of cabinet numbers
- */
-export function getCabinetsFromLocations(locations: string[]): number[] {
-  const cabinets = new Set<number>();
-  
-  locations.forEach(loc => {
-    const parsed = parseLocation(loc);
-    if (parsed) {
-      cabinets.add(parsed.cabinet);
-    }
-  });
-  
-  return Array.from(cabinets).sort((a, b) => a - b);
-}
 
 /**
  * Format a location array ["cab1", "row2", "col3"] into "Cab 1 · Row 2 · Col 3"
