@@ -44,7 +44,7 @@ export const ItemsTable: React.FC<ItemsTableProps> = ({
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
   const [showPlanogram, setShowPlanogram] = useState(false);
-  const [selectedCabinet, setSelectedCabinet] = useState(1);
+  const [selectedCabinet, _setSelectedCabinet] = useState(1);
   const [planogramSelectedItem, setPlanogramSelectedItem] = useState<Item | null>(null);
 
   const handleSort = (field: SortField) => {

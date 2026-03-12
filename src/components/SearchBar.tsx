@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { debounce } from '../utils/helpers';
+import React, { useRef, useState, useEffect } from 'react';
 
 interface SearchBarProps {
   value: string;
@@ -13,20 +12,29 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   placeholder = 'Search items...',
 }) => {
   const [localValue, setLocalValue] = useState(value);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Debounced change handler
-  useEffect(() => {
-    const debouncedChange = debounce((val: string) => {
-      onChange(val);
-    }, 300);
-
-    debouncedChange(localValue);
-  }, [localValue, onChange]);
-
-  // Sync with external value changes
+  // Sync local value when external value is cleared (e.g. reset filters)
   useEffect(() => {
     setLocalValue(value);
   }, [value]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setLocalValue(newValue);
+
+    // Debounce: clear previous timeout, set a new one
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      onChange(newValue);
+    }, 300);
+  };
+
+  const handleClear = () => {
+    setLocalValue('');
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    onChange('');
+  };
 
   return (
     <div className="relative">
@@ -48,13 +56,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       <input
         type="text"
         value={localValue}
-        onChange={(e) => setLocalValue(e.target.value)}
+        onChange={handleChange}
         placeholder={placeholder}
         className="input-field pl-10 pr-10 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
       />
       {localValue && (
         <button
-          onClick={() => setLocalValue('')}
+          onClick={handleClear}
           className="absolute inset-y-0 right-0 pr-3 flex items-center"
         >
           <svg

@@ -36,10 +36,10 @@ async function getNextItemCount(): Promise<number> {
 
 /**
  * Build a document ID from an item name + count.
- * e.g. "Red Valve" + 42 => "redvalve42"
+ * e.g. "Red Valve" + 42 => "redvalve00042"
  */
 function buildItemDocId(name: string, count: number): string {
-  return name.toLowerCase().replace(/[^a-z0-9]/g, '') + count;
+  return name.toLowerCase().replace(/[^a-z0-9]/g, '') + Math.floor(count).toString().padStart(5, '0');
 }
 
 export class FirestoreItemsRepository {
