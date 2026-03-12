@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Item } from '../types/item';
 import { formatDate, getSupplierNameFromUrl } from '../utils/helpers';
 import { PlanogramModal } from './PlanogramModal';
+import { ItemDetailsModal } from './ItemDetailsModal';
 
 interface ItemsTableProps {
   items: Item[];
@@ -13,6 +14,26 @@ interface ItemsTableProps {
 type SortField = 'name' | 'on_hand';
 type SortDirection = 'asc' | 'desc';
 
+// Returns Tailwind color classes based on on_hand / quantity ratio:
+// green  = on_hand > 60% of quantity
+// yellow = on_hand > 15% of quantity
+// red    = on_hand <= 15% of quantity
+// Falls back to yellow if quantity is undefined/zero (can't compute ratio)
+const getStockColor = (on_hand: number, quantity?: number) => {
+  if (!quantity || quantity === 0) {
+    // No quantity to compare against — use absolute fallback
+    return on_hand === 0
+      ? 'bg-red-100 dark:bg-red-950 text-red-800 dark:text-red-200'
+      : 'bg-yellow-100 dark:bg-yellow-950 text-yellow-800 dark:text-yellow-200';
+  }
+
+  const ratio = on_hand / quantity;
+
+  if (ratio > 0.6) return 'bg-green-100 dark:bg-green-950 text-green-800 dark:text-green-200';
+  if (ratio > 0.15) return 'bg-yellow-100 dark:bg-yellow-950 text-yellow-800 dark:text-yellow-200';
+  return 'bg-red-100 dark:bg-red-950 text-red-800 dark:text-red-200';
+};
+
 export const ItemsTable: React.FC<ItemsTableProps> = ({
   items,
   onItemClick,
@@ -21,10 +42,10 @@ export const ItemsTable: React.FC<ItemsTableProps> = ({
 }) => {
   const [sortField, setSortField] = useState<SortField>('name');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
-  
-  // Planogram modal state
+
   const [showPlanogram, setShowPlanogram] = useState(false);
-  const [selectedCabinet, _setSelectedCabinet] = useState(1);
+  const [selectedCabinet, setSelectedCabinet] = useState(1);
+  const [planogramSelectedItem, setPlanogramSelectedItem] = useState<Item | null>(null);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -65,43 +86,21 @@ export const ItemsTable: React.FC<ItemsTableProps> = ({
 
   if (loading) {
     return (
-      <>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-gray-500 dark:text-gray-400">Loading items...</div>
-        </div>
-        
-        {showPlanogram && (
-          <PlanogramModal
-            cabinet={selectedCabinet}
-            items={items}
-            isOpen={showPlanogram}
-            onClose={() => setShowPlanogram(false)}
-          />
-        )}
-      </>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-gray-500 dark:text-gray-400">Loading items...</div>
+      </div>
     );
   }
 
   if (items.length === 0) {
     return (
-      <>
-        <div className="flex flex-col items-center justify-center h-64 text-gray-500 dark:text-gray-400">
-          <svg className="w-16 h-16 mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-          </svg>
-          <p className="text-lg">No items found</p>
-          <p className="text-sm">Try adjusting your filters or add a new item</p>
-        </div>
-        
-        {showPlanogram && (
-          <PlanogramModal
-            cabinet={selectedCabinet}
-            items={items}
-            isOpen={showPlanogram}
-            onClose={() => setShowPlanogram(false)}
-          />
-        )}
-      </>
+      <div className="flex flex-col items-center justify-center h-64 text-gray-500 dark:text-gray-400">
+        <svg className="w-16 h-16 mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+        </svg>
+        <p className="text-lg">No items found</p>
+        <p className="text-sm">Try adjusting your filters or add a new item</p>
+      </div>
     );
   }
 
@@ -111,19 +110,13 @@ export const ItemsTable: React.FC<ItemsTableProps> = ({
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
           <thead className="bg-gray-50 dark:bg-black">
             <tr>
-              <th
-                onClick={() => handleSort('name')}
-                className="table-header"
-              >
+              <th onClick={() => handleSort('name')} className="table-header">
                 <div className="flex items-center space-x-1">
                   <span>Name</span>
                   <SortIcon field="name" />
                 </div>
               </th>
-              <th
-                onClick={() => handleSort('on_hand')}
-                className="table-header"
-              >
+              <th onClick={() => handleSort('on_hand')} className="table-header">
                 <div className="flex items-center space-x-1">
                   <span>On Hand</span>
                   <SortIcon field="on_hand" />
@@ -138,7 +131,6 @@ export const ItemsTable: React.FC<ItemsTableProps> = ({
           </thead>
           <tbody className="bg-white dark:bg-gray-950 divide-y divide-gray-200 dark:divide-gray-800">
             {sortedItems.map((item) => {
-              // location is ['cab1', 'row1', 'col1'] — read directly
               const cabinet = item.location?.[0]?.replace(/\D/g, '');
               const row     = item.location?.[1]?.replace(/\D/g, '');
               const col     = item.location?.[2]?.replace(/\D/g, '');
@@ -154,15 +146,7 @@ export const ItemsTable: React.FC<ItemsTableProps> = ({
                   </td>
                   <td className="table-cell">
                     {item.on_hand !== undefined ? (
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          item.on_hand === 0
-                            ? 'bg-red-100 dark:bg-red-950 text-red-800 dark:text-red-200'
-                            : item.on_hand < 20
-                            ? 'bg-yellow-100 dark:bg-yellow-950 text-yellow-800 dark:text-yellow-200'
-                            : 'bg-green-100 dark:bg-green-950 text-green-800 dark:text-green-200'
-                        }`}
-                      >
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStockColor(item.on_hand, item.quantity)}`}>
                         {item.on_hand}
                       </span>
                     ) : (
@@ -173,7 +157,7 @@ export const ItemsTable: React.FC<ItemsTableProps> = ({
                     {item.quantity !== undefined ? item.quantity : 'N/A'}
                   </td>
 
-                  {/* Cabinet Column - just the number from 'cab1' → '1' */}
+                  {/* Cabinet */}
                   <td className="table-cell">
                     {cabinet ? (
                       <span className="px-2 py-0.5 bg-cyan-100 dark:bg-cyan-950 text-cyan-800 dark:text-cyan-200 rounded text-xs font-semibold">
@@ -184,7 +168,7 @@ export const ItemsTable: React.FC<ItemsTableProps> = ({
                     )}
                   </td>
 
-                  {/* Location Column - Row and Col only */}
+                  {/* Location */}
                   <td className="table-cell">
                     {row && col ? (
                       <span className="text-xs text-gray-700 dark:text-gray-300">
@@ -194,15 +178,13 @@ export const ItemsTable: React.FC<ItemsTableProps> = ({
                       <span className="text-gray-400 dark:text-gray-600">-</span>
                     )}
                   </td>
-                  
+
                   <td className="table-cell">
                     {item.supplier_url ? (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (onSupplierFilter) {
-                            onSupplierFilter(item.supplier_url!);
-                          }
+                          if (onSupplierFilter) onSupplierFilter(item.supplier_url!);
                         }}
                         className="text-blue-600 dark:text-blue-400 hover:underline"
                       >
@@ -225,7 +207,7 @@ export const ItemsTable: React.FC<ItemsTableProps> = ({
           </tbody>
         </table>
       </div>
-      
+
       {/* Planogram Modal */}
       {showPlanogram && (
         <PlanogramModal
@@ -233,6 +215,19 @@ export const ItemsTable: React.FC<ItemsTableProps> = ({
           items={items}
           isOpen={showPlanogram}
           onClose={() => setShowPlanogram(false)}
+          onItemSelect={(item) => {
+            setShowPlanogram(false);
+            setPlanogramSelectedItem(item);
+          }}
+        />
+      )}
+
+      {/* ItemDetailsModal opened from planogram */}
+      {planogramSelectedItem && (
+        <ItemDetailsModal
+          item={planogramSelectedItem}
+          qtyCheckedOut={0}
+          onClose={() => setPlanogramSelectedItem(null)}
         />
       )}
     </>

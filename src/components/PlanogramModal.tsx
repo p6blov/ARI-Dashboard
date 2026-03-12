@@ -1,10 +1,11 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Item } from '../types/item';
 
 interface PlanogramModalProps {
   cabinet: number;
   items: Item[];
   isOpen: boolean;
+  onItemSelect: (item: Item) => void
   onClose: () => void;
 }
 
@@ -12,16 +13,13 @@ export const PlanogramModal: React.FC<PlanogramModalProps> = ({
   cabinet,
   items,
   isOpen,
+  onItemSelect,
   onClose,
 }) => {
-  // Build grid from items
-  // location is a flat array: ['cab1', 'row2', 'col3']
-  // Extract numbers by stripping non-digit characters
   const { grid, itemsInCabinet } = useMemo(() => {
     const gridData: { [key: string]: Item[] } = {};
     const cabinetItems: Item[] = [];
 
-    // Initialize all cells as empty
     for (let r = 1; r <= 6; r++) {
       for (let c = 1; c <= 4; c++) {
         gridData[`${r}-${c}`] = [];
@@ -39,173 +37,165 @@ export const PlanogramModal: React.FC<PlanogramModalProps> = ({
       if (itemCabinet !== cabinet) return;
 
       cabinetItems.push(item);
-
       const key = `${itemRow}-${itemCol}`;
-      if (gridData[key]) {
-        gridData[key].push(item);
-      }
+      if (gridData[key]) gridData[key].push(item);
     });
 
     return { grid: gridData, itemsInCabinet: cabinetItems };
   }, [cabinet, items]);
 
+  const handleItemClick = (item: Item) => {
+    // onClose();
+    onItemSelect(item);
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
-      <div className="bg-white dark:bg-gradient-to-br dark:from-gray-950 dark:via-black dark:to-gray-950 rounded-2xl shadow-2xl max-w-6xl w-full max-h-[95vh] overflow-hidden flex flex-col border border-gray-200 dark:border-cyan-500/20">
-        {/* Header */}
-        <div className="relative px-8 py-6 border-b border-gray-200 dark:border-cyan-500/30 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-950 dark:to-black">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500/5 to-transparent dark:via-cyan-500/10" />
-          <div className="relative flex items-center justify-between">
-            <div>
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/50">
-                  <span className="text-2xl font-bold text-white">{cabinet}</span>
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
-                    Cabinet {cabinet}
-                  </h2>
-                  <p className="text-sm text-gray-600 dark:text-cyan-400/80">
-                    {itemsInCabinet.length} item{itemsInCabinet.length !== 1 ? 's' : ''} stored • 6 rows × 4 columns
-                  </p>
-                </div>
+    <>
+      {isOpen && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-950 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col border border-gray-200 dark:border-gray-800">
+
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-black">
+              <div>
+                <h2 className="text-base font-semibold text-gray-900 dark:text-white">
+                  Cabinet {cabinet}
+                </h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {itemsInCabinet.length} item{itemsInCabinet.length !== 1 ? 's' : ''} · 6 rows × 4 cols
+                </p>
               </div>
+              <button
+                onClick={onClose}
+                className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-800 rounded transition-colors"
+              >
+                <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-200 dark:hover:bg-cyan-500/10 rounded-xl transition-all duration-200 group"
-            >
-              <svg className="w-6 h-6 text-gray-600 dark:text-cyan-400 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
 
-        {/* Grid Container */}
-        <div className="flex-1 overflow-auto p-8 bg-gray-50 dark:bg-black">
-          <div className="grid grid-cols-4 gap-4 max-w-5xl mx-auto">
-            {[1, 2, 3, 4, 5, 6].map((row) =>
-              [1, 2, 3, 4].map((col) => {
-                const key = `${row}-${col}`;
-                const cellItems = grid[key] || [];
-                const hasItems = cellItems.length > 0;
+            {/* Body */}
+            <div className="flex flex-1 overflow-hidden">
 
-                return (
-                  <div
-                    key={key}
-                    className={`
-                      aspect-square rounded-xl transition-all duration-300 relative overflow-hidden group
-                      ${hasItems
-                        ? 'bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-950/30 dark:to-blue-950/30 border-2 border-cyan-200 dark:border-cyan-500/40 shadow-lg hover:shadow-cyan-500/50 dark:shadow-cyan-500/20'
-                        : 'bg-transparent border-2 border-dashed border-gray-200 dark:border-gray-800 hover:border-cyan-300 dark:hover:border-cyan-500/30'
-                      }
-                      hover:scale-105 cursor-pointer
-                    `}
-                  >
-                    {/* Grid Coordinates */}
-                    <div className={`absolute top-2 left-2 text-xs font-bold px-2 py-1 rounded ${
-                      hasItems
-                        ? 'bg-cyan-500 text-white'
-                        : 'bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
-                    }`}>
-                      R{row}C{col}
-                    </div>
+              {/* Left Column — Item List */}
+              <div className="w-52 shrink-0 border-r border-gray-200 dark:border-gray-800 overflow-y-auto bg-gray-50 dark:bg-black">
+                <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-800">
+                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Items
+                  </span>
+                </div>
+                {itemsInCabinet.length === 0 ? (
+                  <p className="px-3 py-4 text-xs text-gray-400 dark:text-gray-600">
+                    No items in this cabinet
+                  </p>
+                ) : (
+                  itemsInCabinet.map((item) => {
+                    const row = item.location[1]?.replace(/\D/g, '');
+                    const col = item.location[2]?.replace(/\D/g, '');
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => handleItemClick(item)}
+                        className="w-full text-left px-3 py-2 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+                      >
+                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                          {item.name}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                          R{row}C{col} · Qty: {item.on_hand ?? 0}
+                        </p>
+                      </button>
+                    );
+                  })
+                )}
+              </div>
 
-                    {/* Corner Accents */}
-                    {hasItems && (
-                      <>
-                        <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-cyan-400 dark:border-cyan-500" />
-                        <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-cyan-400 dark:border-cyan-500" />
-                        <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-cyan-400 dark:border-cyan-500" />
-                        <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-cyan-400 dark:border-cyan-500" />
-                      </>
-                    )}
+              {/* Center — Planogram Grid */}
+              <div className="flex-1 overflow-auto p-5 flex justify-start items-start">
+                <div>
+                  {/* Column headers */}
+                  <div className="flex gap-1.5 mb-1">
+                    {[1, 2, 3, 4].map((col) => (
+                      <div
+                        key={col}
+                        className="w-[90px] text-center text-xs font-semibold text-gray-400 dark:text-gray-600"
+                      >
+                        Col {col}
+                      </div>
+                    ))}
+                  </div>
 
-                    {/* Content */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center p-3">
-                      {hasItems ? (
-                        <>
-                          <div className="text-center w-full mb-2">
-                            <div className="text-sm font-bold text-gray-900 dark:text-white truncate px-2">
-                              {cellItems[0].name}
-                            </div>
-                            {cellItems.length > 1 && (
-                              <div className="text-xs font-semibold text-cyan-600 dark:text-cyan-400 mt-1">
-                                +{cellItems.length - 1} more
-                              </div>
+                  {/* Grid rows */}
+                  {[1, 2, 3, 4, 5, 6].map((row) => (
+                    <div key={row} className="flex items-center gap-1.5 mb-1.5">
+                      {[1, 2, 3, 4].map((col) => {
+                        const key = `${row}-${col}`;
+                        const cellItems = grid[key] || [];
+                        const hasItems = cellItems.length > 0;
+
+                        return (
+                          <div
+                            key={key}
+                            onClick={() => hasItems && handleItemClick(cellItems[0])}
+                            className={`
+                              w-[90px] h-[76px] rounded border flex flex-col p-1.5
+                              ${hasItems
+                                ? 'border-cyan-300 dark:border-cyan-700 bg-cyan-50 dark:bg-cyan-950/30 cursor-pointer hover:bg-cyan-100 dark:hover:bg-cyan-950/50'
+                                : 'border-dashed border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950'
+                              }
+                            `}
+                          >
+                            <span className={`text-[10px] font-bold leading-none ${
+                              hasItems
+                                ? 'text-cyan-600 dark:text-cyan-400'
+                                : 'text-gray-300 dark:text-gray-700'
+                            }`}>
+                              R{row}C{col}
+                            </span>
+
+                            {hasItems ? (
+                              <>
+                                <p className="text-[11px] font-medium text-gray-800 dark:text-gray-200 mt-1 leading-tight line-clamp-2 flex-1">
+                                  {cellItems[0].name}
+                                </p>
+                                <span className="mt-auto self-start text-[10px] font-semibold px-1.5 py-0.5 rounded bg-cyan-500 text-white">
+                                  {cellItems.reduce((sum, i) => sum + (i.on_hand || 0), 0)}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="flex-1 flex items-center justify-center text-[10px] text-gray-300 dark:text-gray-700">
+                                empty
+                              </span>
                             )}
                           </div>
-                          <div className="mt-auto">
-                            <div className="px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-bold shadow-lg">
-                              Qty: {cellItems.reduce((sum, i) => sum + (i.on_hand || 0), 0)}
-                            </div>
-                          </div>
-                        </>
-                      ) : (
-                        <div className="text-xs text-gray-400 dark:text-gray-600 font-medium">
-                          Empty
-                        </div>
-                      )}
-                    </div>
+                        );
+                      })}
 
-                    {/* Hover Glow */}
-                    {hasItems && (
-                      <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/0 via-cyan-400/0 to-blue-400/0 group-hover:from-cyan-400/10 group-hover:via-blue-400/10 group-hover:to-cyan-400/10 transition-all duration-300" />
-                    )}
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-
-        {/* Items List */}
-        {itemsInCabinet.length > 0 && (
-          <div className="border-t border-gray-200 dark:border-cyan-500/30 bg-white dark:bg-gradient-to-br dark:from-gray-950 dark:to-black p-6 max-h-64 overflow-y-auto">
-            <h3 className="text-sm font-bold text-gray-900 dark:text-cyan-400 mb-4 uppercase tracking-wider">
-              All Items in Cabinet {cabinet}
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {itemsInCabinet.map((item) => {
-                const row = item.location[1]?.replace(/\D/g, '');
-                const col = item.location[2]?.replace(/\D/g, '');
-
-                return (
-                  <div
-                    key={item.id}
-                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-cyan-950/20 rounded-lg border border-gray-200 dark:border-cyan-500/30 hover:border-cyan-400 dark:hover:border-cyan-500 transition-all duration-200"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                        {item.name}
-                      </div>
-                      <div className="text-xs text-gray-600 dark:text-cyan-400/70 mt-1">
-                        R{row}C{col}
-                      </div>
+                      {/* Row label */}
+                      <span className="text-xs text-gray-400 dark:text-gray-600 ml-1 w-10 shrink-0">
+                        Row {row}
+                      </span>
                     </div>
-                    <div className="ml-3 px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-xs font-bold">
-                      {item.on_hand || 0}
-                    </div>
-                  </div>
-                );
-              })}
+                  ))}
+                </div>
+              </div>
+
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.2s ease-out;
-        }
-      `}</style>
-    </div>
+      {/* ItemDetailsModal opens after planogram closes */}
+      {/* {selectedItem && (
+        <ItemDetailsModal
+          item={selectedItem}
+          qtyCheckedOut={0}
+          onClose={() => setSelectedItem(null)}
+        />
+      )} */}
+    </>
   );
 };

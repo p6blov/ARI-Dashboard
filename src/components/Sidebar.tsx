@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FilterState } from '../hooks/useItems';
+import { getSupplierNameFromUrl } from '../utils/helpers';
 
 interface SidebarProps {
   filters: FilterState;
@@ -9,27 +10,55 @@ interface SidebarProps {
   onReset: () => void;
 }
 
+const CABINETS = [1, 2, 3, 4, 5];
+
 export const Sidebar: React.FC<SidebarProps> = ({
   filters,
   onFilterChange,
-  availableLocations,
   availableSuppliers,
   onReset,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const toggleLocation = (location: string) => {
-    const newLocations = filters.locations.includes(location)
-      ? filters.locations.filter((l) => l !== location)
-      : [...filters.locations, location];
+  const toggleCabinet = (cabinet: number) => {
+    const key = `cab${cabinet}`;
+    const newLocations = filters.locations.includes(key)
+      ? filters.locations.filter((l) => l !== key)
+      : [...filters.locations, key];
     onFilterChange({ locations: newLocations });
   };
 
-  const toggleSupplier = (supplier: string) => {
-    const newSuppliers = filters.suppliers.includes(supplier)
-      ? filters.suppliers.filter((s) => s !== supplier)
-      : [...filters.suppliers, supplier];
-    onFilterChange({ suppliers: newSuppliers });
+  const isCabinetChecked = (cabinet: number) =>
+    filters.locations.includes(`cab${cabinet}`);
+
+  // Deduplicate suppliers by resolved company name
+  const uniqueSuppliersByName = React.useMemo(() => {
+    const seen = new Map<string, string>();
+    for (const supplier of availableSuppliers) {
+      const name = getSupplierNameFromUrl(supplier);
+      if (!seen.has(name)) seen.set(name, supplier);
+    }
+    return Array.from(seen.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [availableSuppliers]);
+
+  const isSupplierChecked = (companyName: string) =>
+    filters.suppliers.some((s) => getSupplierNameFromUrl(s) === companyName);
+
+  const toggleSupplier = (companyName: string) => {
+    if (isSupplierChecked(companyName)) {
+      onFilterChange({
+        suppliers: filters.suppliers.filter(
+          (s) => getSupplierNameFromUrl(s) !== companyName
+        ),
+      });
+    } else {
+      const toAdd = availableSuppliers.filter(
+        (s) => getSupplierNameFromUrl(s) === companyName
+      );
+      onFilterChange({ suppliers: [...filters.suppliers, ...toAdd] });
+    }
   };
 
   if (isCollapsed) {
@@ -40,18 +69,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
           title="Expand filters"
         >
-          <svg
-            className="w-5 h-5 text-gray-600 dark:text-gray-300"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
+          <svg className="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
       </aside>
@@ -67,45 +86,34 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
           title="Collapse sidebar"
         >
-          <svg
-            className="w-4 h-4 text-gray-600 dark:text-gray-300"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
+          <svg className="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
-        {/* Location Filter */}
+
+        {/* Cabinet Filter */}
         <div>
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Location</h3>
-          <div className="space-y-2 max-h-48 overflow-y-auto">
-            {availableLocations.length === 0 ? (
-              <p className="text-xs text-gray-500 dark:text-gray-400">No locations available</p>
-            ) : (
-              availableLocations.map((location) => (
-                <label
-                  key={location}
-                  className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded"
-                >
-                  <input
-                    type="checkbox"
-                    checked={filters.locations.includes(location)}
-                    onChange={() => toggleLocation(location)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">{location}</span>
-                </label>
-              ))
-            )}
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cabinet</h3>
+          <div className="space-y-2">
+            {CABINETS.map((cabinet) => (
+              <label
+                key={cabinet}
+                className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded"
+              >
+                <input
+                  type="checkbox"
+                  checked={isCabinetChecked(cabinet)}
+                  onChange={() => toggleCabinet(cabinet)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  Cabinet {cabinet}
+                </span>
+              </label>
+            ))}
           </div>
         </div>
 
@@ -113,21 +121,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div>
           <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Supplier</h3>
           <div className="space-y-2 max-h-48 overflow-y-auto">
-            {availableSuppliers.length === 0 ? (
+            {uniqueSuppliersByName.length === 0 ? (
               <p className="text-xs text-gray-500 dark:text-gray-400">No suppliers available</p>
             ) : (
-              availableSuppliers.map((supplier) => (
+              uniqueSuppliersByName.map(({ name }) => (
                 <label
-                  key={supplier}
+                  key={name}
                   className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded"
                 >
                   <input
                     type="checkbox"
-                    checked={filters.suppliers.includes(supplier)}
-                    onChange={() => toggleSupplier(supplier)}
+                    checked={isSupplierChecked(name)}
+                    onChange={() => toggleSupplier(name)}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">{supplier}</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{name}</span>
                 </label>
               ))
             )}
@@ -140,9 +148,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <input
               type="checkbox"
               checked={filters.lowStockOnly}
-              onChange={(e) =>
-                onFilterChange({ lowStockOnly: e.target.checked })
-              }
+              onChange={(e) => onFilterChange({ lowStockOnly: e.target.checked })}
               className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -159,21 +165,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 min="1"
                 max="50"
                 value={filters.lowStockThreshold}
-                onChange={(e) =>
-                  onFilterChange({
-                    lowStockThreshold: parseInt(e.target.value),
-                  })
-                }
+                onChange={(e) => onFilterChange({ lowStockThreshold: parseInt(e.target.value) })}
                 className="w-full mt-1"
               />
             </div>
           )}
         </div>
+
       </div>
 
       {/* Reset Button */}
       <div className="p-4 border-t border-gray-200 dark:border-gray-800">
-        <button onClick={onReset} className="w-full btn-secondary text-sm dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600">
+        <button
+          onClick={onReset}
+          className="w-full btn-secondary text-sm dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
+        >
           Reset Filters
         </button>
       </div>

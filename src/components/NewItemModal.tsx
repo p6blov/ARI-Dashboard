@@ -325,7 +325,7 @@ export const NewItemModal: React.FC<NewItemModalProps> = ({
             {/* Count Person - Auto-filled, read-only */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Count Person (Auto-filled)
+                Count Person
               </label>
               <input
                 type="text"

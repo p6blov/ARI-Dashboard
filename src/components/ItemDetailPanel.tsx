@@ -7,6 +7,7 @@ import { formatPrice, formatDate, toInputDateFormat, toStorageDateFormat } from 
 import { LocationPicker } from './LocationPicker';
 import { BarcodeModal } from './BarcodeModal';
 import { PlanogramModal } from './PlanogramModal';
+import { ItemDetailsModal } from './ItemDetailsModal';
 
 interface ItemDetailPanelProps {
   item: Item;
@@ -26,15 +27,18 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
   const [editedItem, setEditedItem] = useState<Item>(item);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [checkoutQty, setCheckoutQty] = useState(1);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
   const [showBarcode, setShowBarcode] = useState(false);
-  
+
   // Planogram state
   const [showPlanogram, setShowPlanogram] = useState(false);
   const [selectedCabinet, setSelectedCabinet] = useState(1);
+
+  // Lifted state: item selected from inside the planogram
+  const [planogramSelectedItem, setPlanogramSelectedItem] = useState<Item | null>(null);
 
   useEffect(() => {
     setEditedItem({
@@ -138,8 +142,6 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
     }
   };
 
-  // Format a location triplet from the flat array into a readable label
-  // location is ['cab1', 'row2', 'col3'] — strip non-digits from each element
   const formatLocationGroup = (startIdx: number) => {
     const cab = item.location[startIdx]?.replace(/\D/g, '');
     const row = item.location[startIdx + 1]?.replace(/\D/g, '');
@@ -147,7 +149,6 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
     return `Cab ${cab} · Row ${row} · Col ${col}`;
   };
 
-  // Cabinet number is just the digits from index 0 of the location array
   const cabinetNumber = Number(item.location?.[0]?.replace(/\D/g, '') ?? 0);
   const hasLocation = item.location?.length >= 3;
 
@@ -160,14 +161,14 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-black">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Item Details</h2>
         <div className="flex items-center space-x-2">
-          {/* Planogram Button - visible when item has a valid location */}
+          {/* Planogram Button */}
           {hasLocation && (
             <button
               onClick={() => {
                 setSelectedCabinet(cabinetNumber);
                 setShowPlanogram(true);
               }}
-              className="p-2 hover:bg-gray-200 dark:hover:bg-cyan-500/10 rounded-lg transition-colors group"
+              className="p-2 hover:bg-gray-200 dark:hover:bg-cyan-500/10 rounded-lg transition-colors"
               title="View Planogram"
             >
               <svg className="w-5 h-5 text-gray-700 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -175,7 +176,7 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
               </svg>
             </button>
           )}
-          
+
           {/* Barcode Button */}
           <button
             onClick={() => setShowBarcode(true)}
@@ -186,7 +187,7 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
             </svg>
           </button>
-          
+
           {/* Close Button */}
           <button
             onClick={onClose}
@@ -467,7 +468,7 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
           onClose={() => setShowBarcode(false)}
         />
       )}
-      
+
       {/* Planogram Modal */}
       {showPlanogram && (
         <PlanogramModal
@@ -475,6 +476,16 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
           items={allItems}
           isOpen={showPlanogram}
           onClose={() => setShowPlanogram(false)}
+          onItemSelect={(selected) => setPlanogramSelectedItem(selected)}
+        />
+      )}
+
+      {/* ItemDetailsModal — opened when an item is selected from the planogram */}
+      {planogramSelectedItem && (
+        <ItemDetailsModal
+          item={planogramSelectedItem}
+          qtyCheckedOut={0}
+          onClose={() => setPlanogramSelectedItem(null)}
         />
       )}
     </div>
