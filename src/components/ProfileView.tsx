@@ -122,21 +122,21 @@ export const ProfileView: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-1 overflow-hidden bg-gray-50 dark:bg-black">
-        <div className="w-64 bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 p-4 animate-pulse">
+      <div className="flex flex-1 overflow-hidden bg-gray-50 dark:bg-yt-base">
+        <div className="w-64 bg-white dark:bg-yt-surface border-r border-gray-200 dark:border-yt-line p-4 animate-pulse">
           <div className="space-y-2">
-            <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
-            <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
-            <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div className="h-10 bg-gray-200 dark:bg-yt-hover rounded"></div>
+            <div className="h-10 bg-gray-200 dark:bg-yt-hover rounded"></div>
+            <div className="h-10 bg-gray-200 dark:bg-yt-hover rounded"></div>
           </div>
         </div>
         <div className="flex-1 p-6">
-          <div className="bg-white dark:bg-gray-950 rounded-lg shadow-md p-6 animate-pulse">
-            <div className="h-8 bg-gray-300 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
+          <div className="bg-white dark:bg-yt-surface rounded-lg shadow-md p-6 animate-pulse">
+            <div className="h-8 bg-gray-300 dark:bg-yt-hover rounded w-1/3 mb-4"></div>
             <div className="space-y-3">
-              <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded"></div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded"></div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-2/3"></div>
+              <div className="h-4 bg-gray-200 dark:bg-yt-muted rounded"></div>
+              <div className="h-4 bg-gray-200 dark:bg-yt-muted rounded"></div>
+              <div className="h-4 bg-gray-200 dark:bg-yt-muted rounded w-2/3"></div>
             </div>
           </div>
         </div>
@@ -146,7 +146,7 @@ export const ProfileView: React.FC = () => {
 
   if (error || !profile) {
     return (
-      <div className="flex flex-1 items-center justify-center bg-gray-50 dark:bg-black">
+      <div className="flex flex-1 items-center justify-center bg-gray-50 dark:bg-yt-base">
         <div className="text-center">
           <svg className="mx-auto h-16 w-16 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -159,16 +159,16 @@ export const ProfileView: React.FC = () => {
   }
 
   return (
-    <div className="flex h-full overflow-hidden bg-gray-50 dark:bg-black">
+    <div className="flex h-full overflow-hidden bg-gray-50 dark:bg-yt-base">
       {/* Left Sidebar Navigation */}
-      <div className="w-64 bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 p-4">
+      <div className="w-64 bg-white dark:bg-yt-surface border-r border-gray-200 dark:border-yt-line p-4">
         <nav className="space-y-1">
           <button
             onClick={() => setActiveTab('details')}
             className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
               activeTab === 'details'
                 ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-yt-hover'
             }`}
           >
             Details
@@ -178,7 +178,7 @@ export const ProfileView: React.FC = () => {
             className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
               activeTab === 'items'
                 ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-yt-hover'
             }`}
           >
             Items
@@ -188,7 +188,7 @@ export const ProfileView: React.FC = () => {
             className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
               activeTab === 'signout'
                 ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-yt-hover'
             }`}
           >
             Sign Out
@@ -199,7 +199,7 @@ export const ProfileView: React.FC = () => {
       {/* Right Content Panel */}
       <div className="flex-1 p-6 overflow-auto">
         {activeTab === 'details' && profile && (
-          <div className="bg-white dark:bg-gray-950 rounded-lg shadow-md p-6">
+          <div className="bg-white dark:bg-yt-surface rounded-lg shadow-md p-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Profile Details</h2>
             
             <div className="space-y-4">
@@ -233,7 +233,7 @@ export const ProfileView: React.FC = () => {
         )}
 
         {activeTab === 'signout' && (
-          <div className="bg-white dark:bg-gray-950 rounded-lg shadow-md p-6">
+          <div className="bg-white dark:bg-yt-surface rounded-lg shadow-md p-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Sign Out</h2>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
               Are you sure you want to sign out of your account?

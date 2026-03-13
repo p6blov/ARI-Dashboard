@@ -26,6 +26,7 @@ export const CSVImportModal: React.FC<CSVImportModalProps> = ({
   const [validRows, setValidRows] = useState<ItemDraft[]>([]);
   const [errorRows, setErrorRows] = useState<CSVError[]>([]);
   const [imported, setImported] = useState(0);
+  const [parseError, setParseError] = useState<string | null>(null);
 
   const validateRow = (row: any, _rowIndex: number): { valid: boolean; errors: string[]; item?: ItemDraft } => {
     const errors: string[] = [];
@@ -80,9 +81,10 @@ export const CSVImportModal: React.FC<CSVImportModalProps> = ({
   const parseCSV = (csvText: string): void => {
     const lines = csvText.split('\n').filter(line => line.trim());
     if (lines.length < 2) {
-      alert('CSV file must have headers and at least one row');
+      setParseError('CSV file must have headers and at least one data row.');
       return;
     }
+    setParseError(null);
 
     // Parse headers
     const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
@@ -121,6 +123,7 @@ export const CSVImportModal: React.FC<CSVImportModalProps> = ({
     if (selectedFile) {
       setFile(selectedFile);
       setParsing(true);
+      setParseError(null);
 
       const reader = new FileReader();
       reader.onload = (event) => {
@@ -187,6 +190,7 @@ export const CSVImportModal: React.FC<CSVImportModalProps> = ({
     setValidRows([]);
     setErrorRows([]);
     setImported(0);
+    setParseError(null);
     onClose();
   };
 
@@ -194,16 +198,16 @@ export const CSVImportModal: React.FC<CSVImportModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-white dark:bg-yt-surface rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">Import Items from CSV</h2>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-yt-line">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Import Items from CSV</h2>
           <button
             onClick={handleClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-yt-hover rounded-lg transition-colors"
             disabled={importing}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -214,9 +218,14 @@ export const CSVImportModal: React.FC<CSVImportModalProps> = ({
           {/* File Upload */}
           {!file && (
             <div>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+              {parseError && (
+                <div className="mb-4 p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">
+                  {parseError}
+                </div>
+              )}
+              <div className="border-2 border-dashed border-gray-300 dark:border-yt-line rounded-lg p-8 text-center">
                 <svg
-                  className="mx-auto h-12 w-12 text-gray-400"
+                  className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -228,8 +237,8 @@ export const CSVImportModal: React.FC<CSVImportModalProps> = ({
                     d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                   />
                 </svg>
-                <p className="mt-2 text-sm text-gray-600">
-                  <label className="cursor-pointer text-blue-600 hover:text-blue-700 font-medium">
+                <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                  <label className="cursor-pointer text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium">
                     Upload a CSV file
                     <input
                       type="file"
@@ -239,12 +248,12 @@ export const CSVImportModal: React.FC<CSVImportModalProps> = ({
                     />
                   </label>
                 </p>
-                <p className="mt-1 text-xs text-gray-500">CSV with headers: name, description, supplier, location, etc.</p>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">CSV with headers: name, description, supplier, location, etc.</p>
               </div>
 
-              <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-                <h3 className="text-sm font-semibold text-blue-900 mb-2">CSV Format Requirements:</h3>
-                <ul className="text-sm text-blue-800 space-y-1">
+              <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
+                <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-2">CSV Format Requirements:</h3>
+                <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
                   <li>• <strong>name</strong> - Required, item name</li>
                   <li>• <strong>description</strong> - Item description</li>
                   <li>• <strong>supplier</strong> - Supplier name</li>
@@ -264,7 +273,7 @@ export const CSVImportModal: React.FC<CSVImportModalProps> = ({
           {parsing && (
             <div className="text-center py-12">
               <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-              <p className="text-gray-600">Parsing CSV...</p>
+              <p className="text-gray-600 dark:text-gray-400">Parsing CSV...</p>
             </div>
           )}
 
@@ -274,17 +283,17 @@ export const CSVImportModal: React.FC<CSVImportModalProps> = ({
               {/* Valid Rows */}
               {validRows.length > 0 && (
                 <div>
-                  <h3 className="text-lg font-semibold text-green-800 mb-2">
+                  <h3 className="text-lg font-semibold text-green-800 dark:text-green-300 mb-2">
                     ✓ Valid Rows ({validRows.length})
                   </h3>
-                  <div className="bg-green-50 rounded-lg p-4 max-h-48 overflow-y-auto">
+                  <div className="bg-green-50 dark:bg-green-950/30 rounded-lg p-4 max-h-48 overflow-y-auto">
                     {validRows.slice(0, 5).map((item, idx) => (
-                      <div key={idx} className="text-sm text-green-800 py-1">
+                      <div key={idx} className="text-sm text-green-800 dark:text-green-200 py-1">
                         • {item.name} - {item.supplier || 'No supplier'}
                       </div>
                     ))}
                     {validRows.length > 5 && (
-                      <p className="text-sm text-green-700 mt-2">
+                      <p className="text-sm text-green-700 dark:text-green-300 mt-2">
                         ... and {validRows.length - 5} more
                       </p>
                     )}
@@ -295,16 +304,16 @@ export const CSVImportModal: React.FC<CSVImportModalProps> = ({
               {/* Error Rows */}
               {errorRows.length > 0 && (
                 <div>
-                  <h3 className="text-lg font-semibold text-red-800 mb-2">
+                  <h3 className="text-lg font-semibold text-red-800 dark:text-red-300 mb-2">
                     ✗ Errors ({errorRows.length})
                   </h3>
-                  <div className="bg-red-50 rounded-lg p-4 max-h-64 overflow-y-auto space-y-3">
+                  <div className="bg-red-50 dark:bg-red-950/30 rounded-lg p-4 max-h-64 overflow-y-auto space-y-3">
                     {errorRows.map((err, idx) => (
-                      <div key={idx} className="border-b border-red-200 pb-2 last:border-0">
-                        <div className="text-sm font-medium text-red-900">
+                      <div key={idx} className="border-b border-red-200 dark:border-red-800 pb-2 last:border-0">
+                        <div className="text-sm font-medium text-red-900 dark:text-red-200">
                           Row {err.row}: {err.data.name || 'Unnamed'}
                         </div>
-                        <ul className="text-xs text-red-700 ml-4 mt-1">
+                        <ul className="text-xs text-red-700 dark:text-red-300 ml-4 mt-1">
                           {err.errors.map((error, i) => (
                             <li key={i}>• {error}</li>
                           ))}
@@ -317,12 +326,12 @@ export const CSVImportModal: React.FC<CSVImportModalProps> = ({
 
               {/* Import Progress */}
               {importing && (
-                <div className="bg-blue-50 rounded-lg p-4">
+                <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-blue-900">Importing...</span>
-                    <span className="text-sm text-blue-700">{imported} imported</span>
+                    <span className="text-sm font-medium text-blue-900 dark:text-blue-200">Importing...</span>
+                    <span className="text-sm text-blue-700 dark:text-blue-300">{imported} imported</span>
                   </div>
-                  <div className="w-full bg-blue-200 rounded-full h-2">
+                  <div className="w-full bg-blue-200 dark:bg-blue-900 rounded-full h-2">
                     <div
                       className="bg-blue-600 h-2 rounded-full transition-all"
                       style={{ width: `${(imported / (validRows.length + errorRows.length)) * 100}%` }}
@@ -336,7 +345,7 @@ export const CSVImportModal: React.FC<CSVImportModalProps> = ({
 
         {/* Footer Actions */}
         {file && !parsing && !importing && (
-          <div className="border-t border-gray-200 px-6 py-4 bg-gray-50 flex items-center justify-between">
+          <div className="border-t border-gray-200 dark:border-yt-line px-6 py-4 bg-gray-50 dark:bg-yt-base flex items-center justify-between">
             <button
               onClick={handleClose}
               className="btn-secondary"

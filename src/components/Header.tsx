@@ -54,7 +54,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 px-4 py-3">
+    <header className="bg-white dark:bg-yt-surface border-b border-gray-200 dark:border-yt-line px-4 py-3">
       <div className="flex items-center justify-between">
         {/* Left Side */}
         <div className="flex items-center space-x-6">
@@ -69,12 +69,12 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* View Tabs */}
-          <div className="flex space-x-1 bg-gray-100 dark:bg-black rounded-lg p-1">
+          <div className="flex space-x-1 bg-gray-100 dark:bg-yt-base rounded-lg p-1">
             <button
               onClick={() => onViewChange('inventory')}
               className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
                 currentView === 'inventory'
-                  ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm'
+                  ? 'bg-white dark:bg-yt-elevated text-gray-900 dark:text-white shadow-sm'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
@@ -84,7 +84,7 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => onViewChange('profile')}
               className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
                 currentView === 'profile'
-                  ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm'
+                  ? 'bg-white dark:bg-yt-elevated text-gray-900 dark:text-white shadow-sm'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
@@ -110,7 +110,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-lg transition-colors"
+              className="p-2 hover:bg-gray-100 dark:hover:bg-yt-elevated rounded-lg transition-colors"
               title="Menu"
             >
               <svg className="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,9 +120,9 @@ export const Header: React.FC<HeaderProps> = ({
 
             {/* Dropdown Menu */}
             {isMenuOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-950 rounded-lg shadow-lg border border-gray-200 dark:border-gray-800 py-1 z-50">
+              <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-yt-surface rounded-lg shadow-lg border border-gray-200 dark:border-yt-line py-1 z-50">
                 {/* Menu Header */}
-                <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-800">
+                <div className="px-4 py-2 border-b border-gray-200 dark:border-yt-line">
                   <p className="text-sm font-semibold text-gray-900 dark:text-white">Menu</p>
                 </div>
 
@@ -132,7 +132,7 @@ export const Header: React.FC<HeaderProps> = ({
                     {onCSVImport && (
                       <button
                         onClick={() => handleMenuAction(onCSVImport)}
-                        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 flex items-center space-x-2"
+                        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-yt-elevated flex items-center space-x-2"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -144,7 +144,7 @@ export const Header: React.FC<HeaderProps> = ({
                     {onRefresh && (
                       <button
                         onClick={() => handleMenuAction(onRefresh)}
-                        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 flex items-center space-x-2"
+                        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-yt-elevated flex items-center space-x-2"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -156,7 +156,7 @@ export const Header: React.FC<HeaderProps> = ({
                     {onNewItem && (
                       <button
                         onClick={() => handleMenuAction(onNewItem)}
-                        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 flex items-center space-x-2"
+                        className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-yt-elevated flex items-center space-x-2"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -166,7 +166,7 @@ export const Header: React.FC<HeaderProps> = ({
                     )}
 
                     {/* Divider */}
-                    <div className="border-t border-gray-200 dark:border-gray-800 my-1" />
+                    <div className="border-t border-gray-200 dark:border-yt-line my-1" />
                   </>
                 )}
 
@@ -176,7 +176,7 @@ export const Header: React.FC<HeaderProps> = ({
                     setIsMenuOpen(false);
                     toggleTheme();
                   }}
-                  className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 flex items-center space-x-2"
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-yt-elevated flex items-center space-x-2"
                 >
                   {theme === 'dark' ? (
                     <>
@@ -196,12 +196,12 @@ export const Header: React.FC<HeaderProps> = ({
                 </button>
 
                 {/* Divider */}
-                <div className="border-t border-gray-200 dark:border-gray-800 my-1" />
+                <div className="border-t border-gray-200 dark:border-yt-line my-1" />
 
                 {/* Sign Out */}
                 <button
                   onClick={handleLogout}
-                  className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-900 flex items-center space-x-2"
+                  className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-yt-elevated flex items-center space-x-2"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

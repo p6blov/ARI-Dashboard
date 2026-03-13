@@ -32,6 +32,7 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
   const [showBarcode, setShowBarcode] = useState(false);
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
   // Planogram state
   const [showPlanogram, setShowPlanogram] = useState(false);
@@ -51,8 +52,9 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
       delivery_date: item.delivery_date || '',
     });
     setIsEditing(false);
+    setIsConfirmingDelete(false);
     setError(null);
-  }, [item]);
+  }, [item.id]);
 
   const handleSave = async () => {
     try {
@@ -89,9 +91,9 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
   };
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this item?')) return;
     try {
       setIsSaving(true);
+      setIsConfirmingDelete(false);
       await itemsRepository.deleteItem(item.id);
       onClose();
     } catch (err) {
@@ -142,10 +144,10 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
     }
   };
 
-  const formatLocationGroup = (startIdx: number) => {
-    const cab = item.location[startIdx]?.replace(/\D/g, '');
-    const row = item.location[startIdx + 1]?.replace(/\D/g, '');
-    const col = item.location[startIdx + 2]?.replace(/\D/g, '');
+  const formatLocationGroup = (location: string[], startIdx: number) => {
+    const cab = location[startIdx]?.replace(/\D/g, '');
+    const row = location[startIdx + 1]?.replace(/\D/g, '');
+    const col = location[startIdx + 2]?.replace(/\D/g, '');
     return `Cab ${cab} · Row ${row} · Col ${col}`;
   };
 
@@ -154,11 +156,11 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
 
   return (
     <div
-      className="fixed inset-y-0 right-0 w-full md:w-[600px] bg-white dark:bg-gray-950 shadow-xl z-50 overflow-hidden flex flex-col"
+      className="fixed inset-y-0 right-0 w-full md:w-[600px] bg-white dark:bg-yt-surface shadow-xl z-50 overflow-hidden flex flex-col"
       onKeyDown={handleKeyDown}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-black">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-yt-line bg-gray-50 dark:bg-yt-base">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Item Details</h2>
         <div className="flex items-center space-x-2">
           {/* Planogram Button */}
@@ -180,7 +182,7 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
           {/* Barcode Button */}
           <button
             onClick={() => setShowBarcode(true)}
-            className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-200 dark:hover:bg-yt-hover rounded-lg transition-colors"
             title="View Barcode"
           >
             <svg className="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -191,7 +193,7 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-200 dark:hover:bg-yt-hover rounded-lg transition-colors"
             title="Close (Esc)"
           >
             <svg className="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -202,7 +204,7 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-6 bg-white dark:bg-gray-950">
+      <div className="flex-1 overflow-y-auto p-6 bg-white dark:bg-yt-surface">
         {error && (
           <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400 text-sm">
             {error}
@@ -258,7 +260,7 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
                 <div className="flex flex-wrap gap-2">
                   {editedItem.location.length >= 3 && (
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-200">
-                      {formatLocationGroup(0)}
+                      {formatLocationGroup(editedItem.location, 0)}
                       <button
                         onClick={() => setEditedItem({ ...editedItem, location: [] })}
                         className="ml-2 text-blue-600 dark:text-blue-300 hover:text-blue-800 dark:hover:text-blue-100"
@@ -273,7 +275,7 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
               <div className="flex flex-wrap gap-2">
                 {hasLocation ? (
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-200">
-                    {formatLocationGroup(0)}
+                    {formatLocationGroup(item.location, 0)}
                   </span>
                 ) : (
                   <span className="text-gray-500 dark:text-gray-400">N/A</span>
@@ -394,7 +396,7 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
 
       {/* Checkout Section */}
       {!isEditing && (
-        <div className="border-t border-gray-200 dark:border-gray-800 px-6 py-4 bg-blue-50 dark:bg-blue-950/30">
+        <div className="border-t border-gray-200 dark:border-yt-line px-6 py-4 bg-blue-50 dark:bg-blue-950/30">
           <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">Check Out Item</h3>
           {checkoutSuccess ? (
             <div className="bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700 rounded-lg p-3 text-green-800 dark:text-green-300 text-sm">
@@ -430,7 +432,7 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
       )}
 
       {/* Footer Actions */}
-      <div className="border-t border-gray-200 dark:border-gray-800 px-6 py-4 bg-gray-50 dark:bg-black">
+      <div className="border-t border-gray-200 dark:border-yt-line px-6 py-4 bg-gray-50 dark:bg-yt-base">
         <div className="flex items-center justify-between">
           {isEditing ? (
             <>
@@ -441,13 +443,33 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
             </>
           ) : (
             <>
-              <button
-                onClick={handleDelete}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
-                disabled={isSaving}
-              >
-                Delete
-              </button>
+              {isConfirmingDelete ? (
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-red-600 dark:text-red-400 font-medium">Delete this item?</span>
+                  <button
+                    onClick={handleDelete}
+                    className="px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+                    disabled={isSaving}
+                  >
+                    Yes, Delete
+                  </button>
+                  <button
+                    onClick={() => setIsConfirmingDelete(false)}
+                    className="px-3 py-1.5 bg-gray-200 dark:bg-yt-hover text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-yt-muted transition-colors text-sm font-medium"
+                    disabled={isSaving}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setIsConfirmingDelete(true)}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+                  disabled={isSaving}
+                >
+                  Delete
+                </button>
+              )}
               <button onClick={() => setIsEditing(true)} className="btn-primary">Edit</button>
             </>
           )}

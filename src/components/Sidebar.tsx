@@ -63,10 +63,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   if (isCollapsed) {
     return (
-      <aside className="w-12 bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 flex flex-col items-center py-4">
+      <aside className="w-12 bg-white dark:bg-yt-surface border-r border-gray-200 dark:border-yt-line flex flex-col items-center py-4">
         <button
           onClick={() => setIsCollapsed(false)}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-yt-hover rounded-lg"
           title="Expand filters"
         >
           <svg className="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,12 +78,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   }
 
   return (
-    <aside className="w-64 bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 flex flex-col">
-      <div className="px-4 py-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+    <aside className="w-64 bg-white dark:bg-yt-surface border-r border-gray-200 dark:border-yt-line flex flex-col">
+      <div className="px-4 py-4 border-b border-gray-200 dark:border-yt-line flex items-center justify-between">
         <h2 className="font-semibold text-gray-900 dark:text-white">Filters</h2>
         <button
           onClick={() => setIsCollapsed(true)}
-          className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+          className="p-1 hover:bg-gray-100 dark:hover:bg-yt-hover rounded"
           title="Collapse sidebar"
         >
           <svg className="w-4 h-4 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,7 +101,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {CABINETS.map((cabinet) => (
               <label
                 key={cabinet}
-                className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded"
+                className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-yt-hover p-1 rounded"
               >
                 <input
                   type="checkbox"
@@ -127,7 +127,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               uniqueSuppliersByName.map(({ name }) => (
                 <label
                   key={name}
-                  className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1 rounded"
+                  className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-yt-hover p-1 rounded"
                 >
                   <input
                     type="checkbox"
@@ -175,10 +175,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Reset Button */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-800">
+      <div className="p-4 border-t border-gray-200 dark:border-yt-line">
         <button
           onClick={onReset}
-          className="w-full btn-secondary text-sm dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
+          className="w-full btn-secondary text-sm dark:bg-yt-hover dark:text-white dark:hover:bg-yt-muted"
         >
           Reset Filters
         </button>

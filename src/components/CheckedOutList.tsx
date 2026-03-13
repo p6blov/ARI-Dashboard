@@ -54,16 +54,16 @@ export const CheckedOutList: React.FC<CheckedOutListProps> = ({ items, loading }
 
   if (loading) {
     return (
-      <div className="bg-white dark:bg-gray-950 rounded-lg shadow-md p-6">
+      <div className="bg-white dark:bg-yt-surface rounded-lg shadow-md p-6">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Checked Out Items</h2>
         <div className="space-y-3">
           {[1, 2, 3].map(i => (
-            <div key={i} className="animate-pulse flex items-center space-x-4 p-3 bg-gray-50 dark:bg-gray-900 rounded">
+            <div key={i} className="animate-pulse flex items-center space-x-4 p-3 bg-gray-50 dark:bg-yt-elevated rounded">
               <div className="flex-1">
-                <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
-                <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded w-1/2"></div>
+                <div className="h-4 bg-gray-300 dark:bg-yt-hover rounded w-3/4 mb-2"></div>
+                <div className="h-3 bg-gray-200 dark:bg-yt-hover rounded w-1/2"></div>
               </div>
-              <div className="h-8 bg-gray-300 dark:bg-gray-700 rounded w-16"></div>
+              <div className="h-8 bg-gray-300 dark:bg-yt-hover rounded w-16"></div>
             </div>
           ))}
         </div>
@@ -72,7 +72,7 @@ export const CheckedOutList: React.FC<CheckedOutListProps> = ({ items, loading }
   }
 
   return (
-    <div className="bg-white dark:bg-gray-950 rounded-lg shadow-md p-6">
+    <div className="bg-white dark:bg-yt-surface rounded-lg shadow-md p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Checked Out Items</h2>
@@ -146,7 +146,7 @@ export const CheckedOutList: React.FC<CheckedOutListProps> = ({ items, loading }
             return (
               <div
                 key={checkedOutItem.itemId}
-                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-yt-elevated rounded hover:bg-gray-100 dark:hover:bg-yt-hover transition-colors cursor-pointer"
                 onClick={() => setSelectedItem(checkedOutItem)}
               >
                 <div className="flex-1 min-w-0">
@@ -198,7 +198,7 @@ export const CheckedOutList: React.FC<CheckedOutListProps> = ({ items, loading }
       {/* Return Modal */}
       {returningItem && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-950 rounded-lg shadow-xl max-w-md w-full p-6">
+          <div className="bg-white dark:bg-yt-surface rounded-lg shadow-xl max-w-md w-full p-6">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Return Item</h2>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
               {returningItem.item?.name || 'Item'}
