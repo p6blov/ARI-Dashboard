@@ -34,6 +34,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [isNewItemModalOpen, setIsNewItemModalOpen] = useState(false);
   const [isCSVImportOpen, setIsCSVImportOpen] = useState(false);
+  const [importSuccessCount, setImportSuccessCount] = useState<number | null>(null);
 
   // Respond to trigger props
   useEffect(() => {
@@ -64,14 +65,13 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
     };
   }, []);
 
-  // Reset all modal states when component unmounts (user switches views)
+  // Keep selectedItem in sync with live Firestore data
   useEffect(() => {
-    return () => {
-      setSelectedItem(null);
-      setIsNewItemModalOpen(false);
-      setIsCSVImportOpen(false);
-    };
-  }, []);
+    if (selectedItem) {
+      const updated = items.find(i => i.id === selectedItem.id);
+      if (updated) setSelectedItem(updated);
+    }
+  }, [items]);
 
   const handleItemClick = (item: Item) => {
     setSelectedItem(item);
@@ -82,8 +82,9 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
   };
 
   const handleCSVImportComplete = (count: number) => {
-    alert(`Successfully imported ${count} items!`);
+    setImportSuccessCount(count);
     refresh();
+    setTimeout(() => setImportSuccessCount(null), 4000);
   };
 
   const handleItemCreated = (itemId: string) => {
@@ -126,7 +127,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
 
         <main className="flex-1 overflow-hidden flex flex-col">
           {/* Search Bar */}
-          <div className="px-6 py-4 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800">
+          <div className="px-6 py-4 bg-white dark:bg-yt-surface border-b border-gray-200 dark:border-yt-line">
             <SearchBar
               value={filters.search}
               onChange={(value) => updateFilters({ search: value })}
@@ -134,7 +135,7 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
           </div>
 
           {/* Items Table */}
-          <div className="flex-1 overflow-auto bg-white dark:bg-gray-950">
+          <div className="flex-1 overflow-auto bg-white dark:bg-yt-surface">
             {error ? (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
@@ -170,8 +171,18 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
             )}
           </div>
 
+          {/* CSV Import Success Banner */}
+          {importSuccessCount !== null && (
+            <div className="px-6 py-2 bg-green-50 dark:bg-green-950/40 border-t border-green-200 dark:border-green-800 text-sm text-green-800 dark:text-green-300 flex items-center justify-between">
+              <span>Successfully imported {importSuccessCount} items!</span>
+              <button onClick={() => setImportSuccessCount(null)} className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-200 font-medium">
+                ×
+              </button>
+            </div>
+          )}
+
           {/* Status Bar */}
-          <div className="px-6 py-2 bg-gray-50 dark:bg-black border-t border-gray-200 dark:border-gray-800 text-sm text-gray-600 dark:text-gray-400">
+          <div className="px-6 py-2 bg-gray-50 dark:bg-yt-base border-t border-gray-200 dark:border-yt-line text-sm text-gray-600 dark:text-gray-400">
             Showing {items.length} items
             {filters.search && ` matching "${filters.search}"`}
             {(filters.locations.length > 0 ||

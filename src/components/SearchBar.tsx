@@ -58,7 +58,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         value={localValue}
         onChange={handleChange}
         placeholder={placeholder}
-        className="input-field pl-10 pr-10 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
+        className="input-field pl-10 pr-10 dark:bg-yt-hover dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
       />
       {localValue && (
         <button

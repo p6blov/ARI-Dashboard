@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100;
+    @apply bg-gray-50 dark:bg-yt-base text-gray-900 dark:text-gray-100;
   }
   
   /* Fix text selection in dark mode */
@@ -23,15 +23,15 @@
   }
   
   .btn-secondary {
-    @apply px-4 py-2 bg-gray-200 dark:bg-gray-900 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-800 transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 dark:focus:ring-offset-black dark:border dark:border-gray-700;
+    @apply px-4 py-2 bg-gray-200 dark:bg-yt-elevated text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-yt-hover transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 dark:focus:ring-offset-black dark:border dark:border-yt-line;
   }
   
   .input-field {
-    @apply w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-900 dark:text-white dark:placeholder-gray-500;
+    @apply w-full px-3 py-2 border border-gray-300 dark:border-yt-line rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-yt-elevated dark:text-white dark:placeholder-gray-500;
   }
   
   .table-header {
-    @apply px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider bg-gray-100 dark:bg-gray-900 dark:border-b dark:border-gray-800 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors;
+    @apply px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider bg-gray-100 dark:bg-yt-elevated dark:border-b dark:border-yt-line cursor-pointer hover:bg-gray-200 dark:hover:bg-yt-hover transition-colors;
   }
   
   .table-cell {

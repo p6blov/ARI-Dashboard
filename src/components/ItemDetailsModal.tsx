@@ -15,13 +15,13 @@ export const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
 }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-950 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-white dark:bg-yt-surface rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-black">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-yt-line bg-gray-50 dark:bg-yt-base">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Item Details</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-200 dark:hover:bg-yt-hover rounded-lg transition-colors"
           >
             <svg className="w-5 h-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -30,7 +30,7 @@ export const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-white dark:bg-gray-950">
+        <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-white dark:bg-yt-surface">
           {/* Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
@@ -100,7 +100,7 @@ export const ItemDetailsModal: React.FC<ItemDetailsModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="border-t border-gray-200 dark:border-gray-800 px-6 py-4 bg-gray-50 dark:bg-black">
+        <div className="border-t border-gray-200 dark:border-yt-line px-6 py-4 bg-gray-50 dark:bg-yt-base">
           <button onClick={onClose} className="w-full btn-secondary">
             Close
           </button>

@@ -107,8 +107,8 @@ export const ItemsTable: React.FC<ItemsTableProps> = ({
   return (
     <>
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
-          <thead className="bg-gray-50 dark:bg-black">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-yt-line">
+          <thead className="bg-gray-50 dark:bg-yt-base">
             <tr>
               <th onClick={() => handleSort('name')} className="table-header">
                 <div className="flex items-center space-x-1">
@@ -129,7 +129,7 @@ export const ItemsTable: React.FC<ItemsTableProps> = ({
               <th className="table-header">Updated</th>
             </tr>
           </thead>
-          <tbody className="bg-white dark:bg-gray-950 divide-y divide-gray-200 dark:divide-gray-800">
+          <tbody className="bg-white dark:bg-yt-surface divide-y divide-gray-200 dark:divide-yt-line">
             {sortedItems.map((item) => {
               const cabinet = item.location?.[0]?.replace(/\D/g, '');
               const row     = item.location?.[1]?.replace(/\D/g, '');
@@ -139,7 +139,7 @@ export const ItemsTable: React.FC<ItemsTableProps> = ({
                 <tr
                   key={item.id}
                   onClick={() => onItemClick(item)}
-                  className="hover:bg-gray-50 dark:hover:bg-black cursor-pointer transition-colors"
+                  className="hover:bg-gray-50 dark:hover:bg-yt-base cursor-pointer transition-colors"
                 >
                   <td className="table-cell font-medium text-gray-900 dark:text-white">
                     {item.name}

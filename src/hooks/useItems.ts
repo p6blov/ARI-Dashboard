@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Item } from '../types/item';
 import { itemsRepository } from '../services/itemsRepository';
 import { isSameSupplier } from '../utils/helpers';
@@ -28,21 +28,43 @@ export function useItems() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+  const loadingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Subscribe to items on mount
   useEffect(() => {
     setLoading(true);
     setError(null);
 
+    // Safety net: if Firestore doesn't respond in 12s, clear loading
+    loadingTimeoutRef.current = setTimeout(() => {
+      setLoading(false);
+      setError('Connection timed out. Check your network and try refreshing.');
+    }, 12000);
+
+    const clearTimeout_ = () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+        loadingTimeoutRef.current = null;
+      }
+    };
+
     const unsubscribe = itemsRepository.subscribeToItems(
       (updatedItems) => {
+        clearTimeout_();
         setItems(updatedItems);
         setLoading(false);
+        setError(null);
+      },
+      (err) => {
+        clearTimeout_();
+        setLoading(false);
+        setError('Failed to load items: ' + err.message);
       }
     );
 
     // Cleanup subscription on unmount
     return () => {
+      clearTimeout_();
       unsubscribe();
     };
   }, []);
@@ -116,18 +138,15 @@ export function useItems() {
     setFilters(DEFAULT_FILTERS);
   };
 
-  // Refresh items manually
+  // Refresh items manually — does a silent one-shot fetch without a loading spinner
+  // (the onSnapshot listener keeps data live; this just forces a round-trip)
   const refresh = async () => {
     try {
-      setLoading(true);
       setError(null);
-      // The onSnapshot listener will automatically update when data changes
       await itemsRepository.getAllItems();
     } catch (err) {
       setError('Failed to refresh items');
       console.error(err);
-    } finally {
-      setLoading(false);
     }
   };
 

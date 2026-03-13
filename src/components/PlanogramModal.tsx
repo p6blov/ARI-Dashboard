@@ -55,10 +55,10 @@ export const PlanogramModal: React.FC<PlanogramModalProps> = ({
     <>
       {isOpen && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-950 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col border border-gray-200 dark:border-gray-800">
+          <div className="bg-white dark:bg-yt-surface rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col border border-gray-200 dark:border-yt-line">
 
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-black">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 dark:border-yt-line bg-gray-50 dark:bg-yt-base">
               <div>
                 <h2 className="text-base font-semibold text-gray-900 dark:text-white">
                   Cabinet {cabinet}
@@ -69,7 +69,7 @@ export const PlanogramModal: React.FC<PlanogramModalProps> = ({
               </div>
               <button
                 onClick={onClose}
-                className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-800 rounded transition-colors"
+                className="p-1.5 hover:bg-gray-200 dark:hover:bg-yt-hover rounded transition-colors"
               >
                 <svg className="w-4 h-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -81,8 +81,8 @@ export const PlanogramModal: React.FC<PlanogramModalProps> = ({
             <div className="flex flex-1 overflow-hidden">
 
               {/* Left Column — Item List */}
-              <div className="w-52 shrink-0 border-r border-gray-200 dark:border-gray-800 overflow-y-auto bg-gray-50 dark:bg-black">
-                <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-800">
+              <div className="w-52 shrink-0 border-r border-gray-200 dark:border-yt-line overflow-y-auto bg-gray-50 dark:bg-yt-base">
+                <div className="px-3 py-2 border-b border-gray-200 dark:border-yt-line">
                   <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Items
                   </span>
@@ -99,7 +99,7 @@ export const PlanogramModal: React.FC<PlanogramModalProps> = ({
                       <button
                         key={item.id}
                         onClick={() => handleItemClick(item)}
-                        className="w-full text-left px-3 py-2 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+                        className="w-full text-left px-3 py-2 border-b border-gray-100 dark:border-yt-line hover:bg-gray-100 dark:hover:bg-yt-elevated transition-colors"
                       >
                         <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                           {item.name}
@@ -144,7 +144,7 @@ export const PlanogramModal: React.FC<PlanogramModalProps> = ({
                               w-[90px] h-[76px] rounded border flex flex-col p-1.5
                               ${hasItems
                                 ? 'border-cyan-300 dark:border-cyan-700 bg-cyan-50 dark:bg-cyan-950/30 cursor-pointer hover:bg-cyan-100 dark:hover:bg-cyan-950/50'
-                                : 'border-dashed border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950'
+                                : 'border-dashed border-gray-200 dark:border-yt-line bg-white dark:bg-yt-surface'
                               }
                             `}
                           >

@@ -43,7 +43,10 @@ function buildItemDocId(name: string, count: number): string {
 }
 
 export class FirestoreItemsRepository {
-  subscribeToItems(callback: (items: Item[]) => void): Unsubscribe {
+  subscribeToItems(
+    onData: (items: Item[]) => void,
+    onError?: (error: Error) => void
+  ): Unsubscribe {
     const itemsQuery = query(collection(db, ITEMS_COLLECTION));
 
     return onSnapshot(
@@ -53,11 +56,11 @@ export class FirestoreItemsRepository {
           id: doc.id,
           ...doc.data(),
         } as Item));
-        callback(items);
+        onData(items);
       },
       (error) => {
         console.error('Error subscribing to items:', error);
-        throw new Error('Failed to subscribe to items: ' + error.message);
+        onError?.(error);
       }
     );
   }

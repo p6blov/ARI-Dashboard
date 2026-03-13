@@ -26,11 +26,19 @@ export const MainPage: React.FC = () => {
     setTriggerCSVImport(prev => prev + 1);
   };
 
+  const handleViewChange = (view: MainView) => {
+    if (view !== 'inventory') {
+      setTriggerNewItem(0);
+      setTriggerCSVImport(0);
+    }
+    setCurrentView(view);
+  };
+
   return (
-    <div className="h-screen flex flex-col bg-gray-50 dark:bg-black">
-      <Header 
+    <div className="h-screen flex flex-col bg-gray-50 dark:bg-yt-base">
+      <Header
         currentView={currentView}
-        onViewChange={setCurrentView}
+        onViewChange={handleViewChange}
         onNewItem={currentView === 'inventory' ? handleNewItem : undefined}
         onRefresh={currentView === 'inventory' ? handleRefresh : undefined}
         onCSVImport={currentView === 'inventory' ? handleCSVImport : undefined}
