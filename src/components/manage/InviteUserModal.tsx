@@ -33,10 +33,10 @@ export const InviteUserModal: React.FC<Props> = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-950 rounded-lg shadow-xl w-full max-w-md border border-gray-200 dark:border-gray-800">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-800">
-          <h2 className="text-base font-semibold text-gray-900 dark:text-white">Invite User</h2>
-          <button onClick={onClose} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors">
+      <div className="bg-white dark:bg-yt-surface rounded-lg shadow-xl w-full max-w-md border border-gray-200 dark:border-yt-line">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-yt-line">
+          <h2 className="text-base font-semibold text-gray-900 dark:text-white">Send Invite</h2>
+          <button onClick={onClose} className="p-1.5 hover:bg-gray-100 dark:hover:bg-yt-hover rounded transition-colors">
             <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -76,7 +76,7 @@ export const InviteUserModal: React.FC<Props> = ({ onClose }) => {
                   type="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-yt-line rounded-lg bg-white dark:bg-yt-elevated text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="user@example.com"
                   autoFocus
                   required
@@ -87,7 +87,7 @@ export const InviteUserModal: React.FC<Props> = ({ onClose }) => {
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-yt-line text-gray-700 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-yt-hover transition-colors"
                 >
                   Cancel
                 </button>

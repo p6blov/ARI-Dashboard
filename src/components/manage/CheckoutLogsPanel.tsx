@@ -77,11 +77,11 @@ export const CheckoutLogsPanel: React.FC = () => {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3 px-6 py-3 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
+      <div className="flex flex-wrap items-center gap-3 px-6 py-3 border-b border-gray-200 dark:border-yt-line bg-white dark:bg-yt-surface">
         <select
           value={filterUserId}
           onChange={e => setFilterUserId(e.target.value)}
-          className="px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+          className="px-2 py-1.5 text-sm border border-gray-300 dark:border-yt-line rounded bg-white dark:bg-yt-elevated text-gray-900 dark:text-white"
         >
           <option value="">All users</option>
           {userOptions.map(u => (
@@ -92,7 +92,7 @@ export const CheckoutLogsPanel: React.FC = () => {
         <select
           value={filterAction}
           onChange={e => setFilterAction(e.target.value as any)}
-          className="px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+          className="px-2 py-1.5 text-sm border border-gray-300 dark:border-yt-line rounded bg-white dark:bg-yt-elevated text-gray-900 dark:text-white"
         >
           <option value="">All actions</option>
           <option value="checkout">Checkouts</option>
@@ -103,14 +103,14 @@ export const CheckoutLogsPanel: React.FC = () => {
           type="date"
           value={filterStart}
           onChange={e => setFilterStart(e.target.value)}
-          className="px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+          className="px-2 py-1.5 text-sm border border-gray-300 dark:border-yt-line rounded bg-white dark:bg-yt-elevated text-gray-900 dark:text-white"
           placeholder="From date"
         />
         <input
           type="date"
           value={filterEnd}
           onChange={e => setFilterEnd(e.target.value)}
-          className="px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+          className="px-2 py-1.5 text-sm border border-gray-300 dark:border-yt-line rounded bg-white dark:bg-yt-elevated text-gray-900 dark:text-white"
           placeholder="To date"
         />
 
@@ -129,7 +129,7 @@ export const CheckoutLogsPanel: React.FC = () => {
           </div>
         ) : (
           <table className="w-full">
-            <thead className="sticky top-0 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800">
+            <thead className="sticky top-0 bg-white dark:bg-yt-surface border-b border-gray-200 dark:border-yt-line">
               <tr>
                 <th className="text-left px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Timestamp</th>
                 <th className="text-left px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">User</th>
@@ -144,7 +144,7 @@ export const CheckoutLogsPanel: React.FC = () => {
                 const user = users.get(log.userId);
                 const item = items.get(log.itemId);
                 return (
-                  <tr key={log.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900">
+                  <tr key={log.id} className="border-b border-gray-100 dark:border-yt-line hover:bg-gray-50 dark:hover:bg-yt-hover">
                     <td className="px-4 py-3 text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">
                       {formatTimestamp(log.timestamp)}
                     </td>

@@ -27,10 +27,9 @@ export const PlanogramConfigPanel: React.FC = () => {
   };
 
   const handleAddCabinet = () => {
-    const existing = Object.keys(config);
-    const nextNum = existing.length + 1;
+    let nextNum = 1;
+    while (config[`cab${nextNum}`]) nextNum++;
     const newKey = `cab${nextNum}`;
-    if (config[newKey]) return;
     setConfig(prev => ({
       ...prev,
       [newKey]: { rows: 6, cols: 4, label: `Cabinet ${nextNum}` },
@@ -74,22 +73,11 @@ export const PlanogramConfigPanel: React.FC = () => {
   return (
     <div className="h-full overflow-auto p-6">
       <div className="max-w-2xl space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-base font-semibold text-gray-900 dark:text-white">Cabinet Layout</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-              Configure the number of rows and columns for each cabinet. Changes affect the planogram display.
-            </p>
-          </div>
-          <button
-            onClick={handleAddCabinet}
-            className="flex items-center space-x-1 px-3 py-1.5 border border-gray-300 dark:border-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            <span>Add Cabinet</span>
-          </button>
+        <div>
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white">Cabinet Layout</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            Configure the number of rows and columns for each cabinet. Changes affect the planogram display.
+          </p>
         </div>
 
         {error && (
@@ -104,7 +92,7 @@ export const PlanogramConfigPanel: React.FC = () => {
             return (
               <div
                 key={key}
-                className="bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-4"
+                className="bg-white dark:bg-yt-surface border border-gray-200 dark:border-yt-line rounded-lg p-4"
               >
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-wider">{key}</span>
@@ -122,7 +110,7 @@ export const PlanogramConfigPanel: React.FC = () => {
                       type="text"
                       value={cab.label}
                       onChange={e => handleChange(key, 'label', e.target.value)}
-                      className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-yt-line rounded bg-white dark:bg-yt-elevated text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
@@ -133,7 +121,7 @@ export const PlanogramConfigPanel: React.FC = () => {
                       max={20}
                       value={cab.rows}
                       onChange={e => handleChange(key, 'rows', e.target.value)}
-                      className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-yt-line rounded bg-white dark:bg-yt-elevated text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
@@ -144,7 +132,7 @@ export const PlanogramConfigPanel: React.FC = () => {
                       max={20}
                       value={cab.cols}
                       onChange={e => handleChange(key, 'cols', e.target.value)}
-                      className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-yt-line rounded bg-white dark:bg-yt-elevated text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
@@ -155,6 +143,16 @@ export const PlanogramConfigPanel: React.FC = () => {
             );
           })}
         </div>
+
+        <button
+          onClick={handleAddCabinet}
+          className="flex items-center space-x-1 px-3 py-1.5 border border-gray-300 dark:border-yt-line rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-yt-hover transition-colors w-fit"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          <span>Add Cabinet</span>
+        </button>
 
         <div className="flex items-center space-x-3 pt-2">
           <button

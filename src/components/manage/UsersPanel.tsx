@@ -14,7 +14,7 @@ const ROLE_LABELS: Record<number, string> = {
 };
 
 const ROLE_COLORS: Record<number, string> = {
-  0: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+  0: 'bg-gray-100 text-gray-700 dark:bg-yt-elevated dark:text-gray-300',
   1: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
   2: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
   3: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
@@ -53,6 +53,8 @@ const UserRow: React.FC<UserRowProps> = ({ user, onUpdated, teams }) => {
     try {
       const items = await getCheckedOutItems(user.uid);
       setCheckedOutItems(items);
+    } catch {
+      setCheckedOutItems([]);
     } finally {
       setLoadingItems(false);
     }
@@ -84,7 +86,7 @@ const UserRow: React.FC<UserRowProps> = ({ user, onUpdated, teams }) => {
   return (
     <>
       <tr
-        className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 cursor-pointer"
+        className="border-b border-gray-100 dark:border-yt-line hover:bg-gray-50 dark:hover:bg-yt-hover cursor-pointer"
         onClick={() => setExpanded(e => !e)}
       >
         <td className="px-4 py-3">
@@ -103,7 +105,7 @@ const UserRow: React.FC<UserRowProps> = ({ user, onUpdated, teams }) => {
         <td className="px-4 py-3 text-right">
           <button
             onClick={e => { e.stopPropagation(); setEditing(true); setExpanded(true); }}
-            className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-700 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors"
+            className="text-xs px-2 py-1 border border-gray-300 dark:border-yt-line rounded hover:bg-gray-100 dark:hover:bg-yt-hover text-gray-700 dark:text-gray-300 transition-colors"
           >
             Edit
           </button>
@@ -111,7 +113,7 @@ const UserRow: React.FC<UserRowProps> = ({ user, onUpdated, teams }) => {
       </tr>
 
       {expanded && (
-        <tr className="bg-gray-50 dark:bg-gray-900">
+        <tr className="bg-gray-50 dark:bg-yt-elevated">
           <td colSpan={5} className="px-6 py-4">
             {editing ? (
               <div className="space-y-3 max-w-lg">
@@ -125,7 +127,7 @@ const UserRow: React.FC<UserRowProps> = ({ user, onUpdated, teams }) => {
                     <input
                       value={editName}
                       onChange={e => setEditName(e.target.value)}
-                      className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-yt-line rounded bg-white dark:bg-yt-elevated text-gray-900 dark:text-white"
                     />
                   </div>
                   <div>
@@ -133,7 +135,7 @@ const UserRow: React.FC<UserRowProps> = ({ user, onUpdated, teams }) => {
                     <input
                       value={editEmail}
                       onChange={e => setEditEmail(e.target.value)}
-                      className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-yt-line rounded bg-white dark:bg-yt-elevated text-gray-900 dark:text-white"
                     />
                   </div>
                   <div>
@@ -141,7 +143,7 @@ const UserRow: React.FC<UserRowProps> = ({ user, onUpdated, teams }) => {
                     <select
                       value={editRole}
                       onChange={e => setEditRole(Number(e.target.value))}
-                      className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-yt-line rounded bg-white dark:bg-yt-elevated text-gray-900 dark:text-white"
                     >
                       {Object.entries(ROLE_LABELS).map(([v, label]) => (
                         <option key={v} value={v}>{label}</option>
@@ -153,7 +155,7 @@ const UserRow: React.FC<UserRowProps> = ({ user, onUpdated, teams }) => {
                     <select
                       value={editTeam}
                       onChange={e => setEditTeam(e.target.value)}
-                      className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-yt-line rounded bg-white dark:bg-yt-elevated text-gray-900 dark:text-white"
                     >
                       <option value="">None</option>
                       {teams.map(t => (
@@ -165,7 +167,7 @@ const UserRow: React.FC<UserRowProps> = ({ user, onUpdated, teams }) => {
                 <div className="flex space-x-2">
                   <button
                     onClick={() => setEditing(false)}
-                    className="px-3 py-1.5 text-xs border border-gray-300 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    className="px-3 py-1.5 text-xs border border-gray-300 dark:border-yt-line rounded text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-yt-hover"
                   >
                     Cancel
                   </button>
@@ -245,17 +247,17 @@ export const UsersPanel: React.FC = () => {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Toolbar */}
-      <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
+      <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200 dark:border-yt-line bg-white dark:bg-yt-surface">
         <span className="text-sm text-gray-500 dark:text-gray-400">{users.length} users</span>
         <div className="flex space-x-2">
           <button
             onClick={() => setShowInvite(true)}
-            className="flex items-center space-x-1.5 px-3 py-1.5 border border-gray-300 dark:border-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            className="flex items-center space-x-1.5 px-3 py-1.5 border border-gray-300 dark:border-yt-line rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-yt-hover transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
-            <span>Invite User</span>
+            <span>Send Invite</span>
           </button>
           <button
             onClick={() => setShowCreate(true)}
@@ -277,7 +279,7 @@ export const UsersPanel: React.FC = () => {
           </div>
         ) : (
           <table className="w-full">
-            <thead className="sticky top-0 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800">
+            <thead className="sticky top-0 bg-white dark:bg-yt-surface border-b border-gray-200 dark:border-yt-line">
               <tr>
                 <th className="text-left px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">User</th>
                 <th className="text-left px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Team</th>
