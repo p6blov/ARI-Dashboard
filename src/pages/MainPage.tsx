@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { Header } from '../components/Header';
 import { InventoryView } from '../components/InventoryView';
 import { ProfileView } from '../components/ProfileView';
+import { ManageView } from '../components/ManageView';
 
-type MainView = 'inventory' | 'profile';
+type MainView = 'inventory' | 'profile' | 'manage';
 
 export const MainPage: React.FC = () => {
   const [currentView, setCurrentView] = useState<MainView>('inventory');
@@ -48,13 +49,15 @@ export const MainPage: React.FC = () => {
       {/* Content Area */}
       <div className="flex-1 overflow-hidden">
         {currentView === 'inventory' ? (
-          <InventoryView 
+          <InventoryView
             triggerNewItem={triggerNewItem}
             triggerRefresh={triggerRefresh}
             triggerCSVImport={triggerCSVImport}
           />
-        ) : (
+        ) : currentView === 'profile' ? (
           <ProfileView />
+        ) : (
+          <ManageView />
         )}
       </div>
     </div>

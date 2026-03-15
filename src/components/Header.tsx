@@ -3,23 +3,23 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface HeaderProps {
-  currentView: 'inventory' | 'profile';
-  onViewChange: (view: 'inventory' | 'profile') => void;
+  currentView: 'inventory' | 'profile' | 'manage';
+  onViewChange: (view: 'inventory' | 'profile' | 'manage') => void;
   onNewItem?: () => void;
   onRefresh?: () => void;
   onCSVImport?: () => void;
   isConnected?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ 
+export const Header: React.FC<HeaderProps> = ({
   currentView,
   onViewChange,
-  onNewItem, 
-  onRefresh, 
-  onCSVImport, 
-  isConnected = true 
+  onNewItem,
+  onRefresh,
+  onCSVImport,
+  isConnected = true
 }) => {
-  const { user: _user, logOut } = useAuth();
+  const { user: _user, userProfile, logOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -90,6 +90,18 @@ export const Header: React.FC<HeaderProps> = ({
             >
               Profile
             </button>
+            {userProfile && userProfile.role > 2 && (
+              <button
+                onClick={() => onViewChange('manage')}
+                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  currentView === 'manage'
+                    ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              >
+                Manage
+              </button>
+            )}
           </div>
         </div>
 
