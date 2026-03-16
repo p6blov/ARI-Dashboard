@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FilterState } from '../hooks/useItems';
 import { getSupplierNameFromUrl } from '../utils/helpers';
+import { useCabinetConfig } from '../hooks/useCabinetConfig';
 
 interface SidebarProps {
   filters: FilterState;
@@ -10,8 +11,6 @@ interface SidebarProps {
   onReset: () => void;
 }
 
-const CABINETS = [1, 2, 3, 4, 5];
-
 export const Sidebar: React.FC<SidebarProps> = ({
   filters,
   onFilterChange,
@@ -19,17 +18,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onReset,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const cabinetConfig = useCabinetConfig();
+  const cabinetKeys = cabinetConfig ? Object.keys(cabinetConfig).sort() : [];
 
-  const toggleCabinet = (cabinet: number) => {
-    const key = `cab${cabinet}`;
+  const toggleCabinet = (key: string) => {
     const newLocations = filters.locations.includes(key)
       ? filters.locations.filter((l) => l !== key)
       : [...filters.locations, key];
     onFilterChange({ locations: newLocations });
   };
 
-  const isCabinetChecked = (cabinet: number) =>
-    filters.locations.includes(`cab${cabinet}`);
+  const isCabinetChecked = (key: string) =>
+    filters.locations.includes(key);
 
   // Deduplicate suppliers by resolved company name
   const uniqueSuppliersByName = React.useMemo(() => {
@@ -98,22 +98,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div>
           <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cabinet</h3>
           <div className="space-y-2">
-            {CABINETS.map((cabinet) => (
-              <label
-                key={cabinet}
-                className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-yt-hover p-1 rounded"
-              >
-                <input
-                  type="checkbox"
-                  checked={isCabinetChecked(cabinet)}
-                  onChange={() => toggleCabinet(cabinet)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  Cabinet {cabinet}
-                </span>
-              </label>
-            ))}
+            {cabinetKeys.length === 0 ? (
+              <p className="text-xs text-gray-500 dark:text-gray-400">Loading...</p>
+            ) : (
+              cabinetKeys.map((key) => (
+                <label
+                  key={key}
+                  className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-yt-hover p-1 rounded"
+                >
+                  <input
+                    type="checkbox"
+                    checked={isCabinetChecked(key)}
+                    onChange={() => toggleCabinet(key)}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    {cabinetConfig![key].label}
+                  </span>
+                </label>
+              ))
+            )}
           </div>
         </div>
 

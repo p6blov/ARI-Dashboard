@@ -38,10 +38,19 @@ service cloud.firestore {
       allow write: if request.auth != null && callerRole() > 2;
     }
 
+    // teams is public so the invite page can populate the team dropdown without auth
+    match /metadata/teams {
+      allow read: if true;
+    }
+
     // Invitations
     match /invitations/{token} {
       allow read: if true;
       allow write: if request.auth != null && callerRole() > 2;
+      // Allow the invited user to mark their own invitation as used
+      allow update: if request.auth != null
+        && resource.data.email == request.auth.token.email
+        && request.resource.data.used == true;
     }
   }
 }

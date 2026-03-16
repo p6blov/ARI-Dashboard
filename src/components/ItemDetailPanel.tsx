@@ -5,6 +5,7 @@ import { checkoutItem } from '../services/checkoutService';
 import { useAuth } from '../contexts/AuthContext';
 import { formatPrice, formatDate, toInputDateFormat, toStorageDateFormat } from '../utils/helpers';
 import { LocationPicker } from './LocationPicker';
+import { useCabinetConfig } from '../hooks/useCabinetConfig';
 import { BarcodeModal } from './BarcodeModal';
 import { PlanogramModal } from './PlanogramModal';
 import { ItemDetailsModal } from './ItemDetailsModal';
@@ -23,6 +24,7 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
   allItems = [],
 }) => {
   const { user } = useAuth();
+  const cabinetConfig = useCabinetConfig();
   const [isEditing, setIsEditing] = useState(false);
   const [editedItem, setEditedItem] = useState<Item>(item);
   const [isSaving, setIsSaving] = useState(false);
@@ -249,13 +251,14 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
             {isEditing ? (
               <div className="space-y-2">
                 <LocationPicker
-                  onLocationAdd={(cab, row, col) => {
+                  onLocationAdd={(cabKey, row, col) => {
                     setEditedItem({
                       ...editedItem,
-                      location: [`cab${cab}`, `row${row}`, `col${col}`],
+                      location: [cabKey, `row${row}`, `col${col}`],
                     });
                   }}
                   existingLocations={editedItem.location}
+                  cabinetConfig={cabinetConfig}
                 />
                 <div className="flex flex-wrap gap-2">
                   {editedItem.location.length >= 3 && (
@@ -405,7 +408,10 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
           ) : (
             <div className="flex items-end space-x-3">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quantity</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Quantity
+                  <span className="ml-2 text-xs font-normal text-gray-500 dark:text-gray-400">({editedItem.on_hand ?? 0} available)</span>
+                </label>
                 <input
                   type="number"
                   min="1"
@@ -415,9 +421,6 @@ export const ItemDetailPanel: React.FC<ItemDetailPanelProps> = ({
                   className="input-field"
                   disabled={isCheckingOut}
                 />
-                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                  Available: {editedItem.on_hand ?? 0}
-                </p>
               </div>
               <button
                 onClick={handleCheckout}

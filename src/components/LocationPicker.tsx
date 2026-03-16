@@ -1,35 +1,58 @@
 import React from 'react';
+import { CabinetConfig } from '../services/cabinetService';
+
+const FALLBACK_CONFIG: CabinetConfig = {
+  cab1: { rows: 6, cols: 4, label: 'Cabinet 1' },
+  cab2: { rows: 6, cols: 4, label: 'Cabinet 2' },
+  cab3: { rows: 6, cols: 4, label: 'Cabinet 3' },
+  cab4: { rows: 6, cols: 4, label: 'Cabinet 4' },
+  cab5: { rows: 6, cols: 4, label: 'Cabinet 5' },
+};
 
 interface LocationPickerProps {
-  onLocationAdd: (cabinet: number, row: number, col: number) => void;
+  onLocationAdd: (cabinetKey: string, row: number, col: number) => void;
   existingLocations: string[];
+  cabinetConfig?: CabinetConfig | null;
 }
 
 export const LocationPicker: React.FC<LocationPickerProps> = ({
   onLocationAdd,
   existingLocations,
+  cabinetConfig,
 }) => {
-  const [cabinet, setCabinet] = React.useState<number>(1);
+  const config = cabinetConfig ?? FALLBACK_CONFIG;
+  const cabinetKeys = Object.keys(config).sort();
+
+  const [cabinet, setCabinet] = React.useState<string>(cabinetKeys[0] ?? 'cab1');
   const [row, setRow] = React.useState<number>(1);
   const [col, setCol] = React.useState<number>(1);
 
+  const handleCabinetChange = (key: string) => {
+    setCabinet(key);
+    setRow(1);
+    setCol(1);
+  };
+
+  // Keep cabinet selection valid if config changes
+  React.useEffect(() => {
+    if (!config[cabinet]) {
+      const firstKey = Object.keys(config).sort()[0];
+      if (firstKey) setCabinet(firstKey);
+    }
+  }, [config]);
+
+  const currentCab = config[cabinet] ?? { rows: 6, cols: 4, label: cabinet };
+
   const handleAdd = () => {
-    // Check if this location already exists
-    // Locations are stored as flat array: ["cab1", "row2", "col3", "cab2", "row1", "col4"]
-    // So we check every group of 3
-    const locationExists = Array.from({ length: existingLocations.length / 3 }).some((_, idx) => {
+    const locationExists = Array.from({ length: Math.floor(existingLocations.length / 3) }).some((_, idx) => {
       const startIdx = idx * 3;
-      const existingCab = existingLocations[startIdx];
-      const existingRow = existingLocations[startIdx + 1];
-      const existingCol = existingLocations[startIdx + 2];
-      
       return (
-        existingCab === `cab${cabinet}` &&
-        existingRow === `row${row}` &&
-        existingCol === `col${col}`
+        existingLocations[startIdx] === cabinet &&
+        existingLocations[startIdx + 1] === `row${row}` &&
+        existingLocations[startIdx + 2] === `col${col}`
       );
     });
-    
+
     if (!locationExists) {
       onLocationAdd(cabinet, row, col);
     }
@@ -43,12 +66,12 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
         </label>
         <select
           value={cabinet}
-          onChange={(e) => setCabinet(parseInt(e.target.value))}
+          onChange={(e) => handleCabinetChange(e.target.value)}
           className="input-field text-sm"
         >
-          {[1, 2, 3, 4, 5].map((num) => (
-            <option key={num} value={num}>
-              {num}
+          {cabinetKeys.map((key) => (
+            <option key={key} value={key}>
+              {config[key].label}
             </option>
           ))}
         </select>
@@ -63,10 +86,8 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
           onChange={(e) => setRow(parseInt(e.target.value))}
           className="input-field text-sm"
         >
-          {[1, 2, 3, 4, 5, 6].map((num) => (
-            <option key={num} value={num}>
-              {num}
-            </option>
+          {Array.from({ length: currentCab.rows }, (_, i) => i + 1).map((num) => (
+            <option key={num} value={num}>{num}</option>
           ))}
         </select>
       </div>
@@ -80,10 +101,8 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
           onChange={(e) => setCol(parseInt(e.target.value))}
           className="input-field text-sm"
         >
-          {[1, 2, 3, 4].map((num) => (
-            <option key={num} value={num}>
-              {num}
-            </option>
+          {Array.from({ length: currentCab.cols }, (_, i) => i + 1).map((num) => (
+            <option key={num} value={num}>{num}</option>
           ))}
         </select>
       </div>

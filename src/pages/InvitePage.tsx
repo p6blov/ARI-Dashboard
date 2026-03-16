@@ -59,10 +59,14 @@ export const InvitePage: React.FC = () => {
 
         setInviteData(data);
 
-        // Load teams
-        const teamsSnap = await getDoc(doc(db, 'metadata', 'teams'));
-        if (teamsSnap.exists()) {
-          setTeams(teamsSnap.data().teams || []);
+        // Load teams (best-effort — metadata requires auth, so this may fail in incognito)
+        try {
+          const teamsSnap = await getDoc(doc(db, 'metadata', 'teams'));
+          if (teamsSnap.exists()) {
+            setTeams(teamsSnap.data().teams || []);
+          }
+        } catch {
+          // teams unavailable, form still works without the dropdown populated
         }
 
         setPageState('form');
@@ -136,7 +140,6 @@ export const InvitePage: React.FC = () => {
 
           {pageState === 'invalid' && (
             <div className="text-center py-8">
-              <div className="text-4xl mb-4">❌</div>
               <h2 className="text-xl font-semibold text-gray-900 mb-2">Invalid Link</h2>
               <p className="text-gray-500">This invitation link is invalid. Please contact your administrator for a new invitation.</p>
             </div>
@@ -144,7 +147,6 @@ export const InvitePage: React.FC = () => {
 
           {pageState === 'expired' && (
             <div className="text-center py-8">
-              <div className="text-4xl mb-4">⏰</div>
               <h2 className="text-xl font-semibold text-gray-900 mb-2">Link Expired</h2>
               <p className="text-gray-500">This invitation link has expired (48 hours). Please contact your administrator for a new invitation.</p>
             </div>
@@ -152,7 +154,6 @@ export const InvitePage: React.FC = () => {
 
           {pageState === 'used' && (
             <div className="text-center py-8">
-              <div className="text-4xl mb-4">✓</div>
               <h2 className="text-xl font-semibold text-gray-900 mb-2">Already Used</h2>
               <p className="text-gray-500">This invitation has already been used. If you need access, please contact your administrator.</p>
               <button
@@ -166,7 +167,6 @@ export const InvitePage: React.FC = () => {
 
           {pageState === 'success' && (
             <div className="text-center py-8">
-              <div className="text-4xl mb-4">🎉</div>
               <h2 className="text-xl font-semibold text-gray-900 mb-2">Account Created!</h2>
               <p className="text-gray-500">Your account has been created successfully. Redirecting to dashboard...</p>
             </div>
