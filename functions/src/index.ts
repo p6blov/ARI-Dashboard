@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin';
-import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { onRequest } from 'firebase-functions/v2/https';
 import { Resend } from 'resend';
 
 admin.initializeApp();
@@ -9,43 +9,55 @@ const db = admin.firestore();
  * Send an email invitation with a secure one-time token.
  * Only callable by authenticated users with role > 2.
  */
-exports.sendInvitation = onCall({ secrets: ['RESEND_API_KEY'], invoker: 'public' }, async (request) => {
-  if (!request.auth) {
-    throw new HttpsError('unauthenticated', 'Must be signed in.');
+exports.sendInvitation = onRequest({ cors: true, secrets: ['RESEND_API_KEY'] }, async (req, res) => {
+  const token = req.headers.authorization?.split('Bearer ')[1];
+  if (!token) {
+    res.status(401).json({ error: 'Unauthenticated' });
+    return;
   }
 
-  const callerUid = request.auth.uid;
-  const callerDoc = await db.collection('users').doc(callerUid).get();
+  let decoded: admin.auth.DecodedIdToken;
+  try {
+    decoded = await admin.auth().verifyIdToken(token);
+  } catch {
+    res.status(401).json({ error: 'Invalid token' });
+    return;
+  }
+
+  const callerDoc = await db.collection('users').doc(decoded.uid).get();
   if (!callerDoc.exists || (callerDoc.data()?.role ?? 0) <= 2) {
-    throw new HttpsError('permission-denied', 'Insufficient role to send invitations.');
+    res.status(403).json({ error: 'Insufficient role to send invitations.' });
+    return;
   }
 
-  const { email } = request.data as { email: string };
+  const { email } = req.body as { email: string };
   if (!email || typeof email !== 'string' || !email.includes('@')) {
-    throw new HttpsError('invalid-argument', 'A valid email address is required.');
+    res.status(400).json({ error: 'A valid email address is required.' });
+    return;
   }
 
-  const token = crypto.randomUUID();
+  const inviteToken = crypto.randomUUID();
   const now = admin.firestore.Timestamp.now();
   const expiresAt = admin.firestore.Timestamp.fromMillis(Date.now() + 48 * 60 * 60 * 1000);
 
-  await db.collection('invitations').doc(token).set({
+  await db.collection('invitations').doc(inviteToken).set({
     email,
-    token,
+    token: inviteToken,
     createdAt: now,
     expiresAt,
     used: false,
-    createdBy: callerUid,
+    createdBy: decoded.uid,
   });
 
   const resendApiKey = process.env.RESEND_API_KEY;
   if (!resendApiKey) {
-    throw new HttpsError('internal', 'Email service not configured. Set RESEND_API_KEY secret.');
+    res.status(500).json({ error: 'Email service not configured. Set RESEND_API_KEY secret.' });
+    return;
   }
 
   const resend = new Resend(resendApiKey);
   const appUrl = process.env.APP_URL || 'https://aero-rocket-inventory.vercel.app';
-  const inviteUrl = `${appUrl}/invite?token=${token}`;
+  const inviteUrl = `${appUrl}/invite?token=${inviteToken}`;
 
   await resend.emails.send({
     from: 'ARI Dashboard <noreply@fiuseds.com>',
@@ -54,25 +66,35 @@ exports.sendInvitation = onCall({ secrets: ['RESEND_API_KEY'], invoker: 'public'
     html: `<p>Follow the link below to create your account:</p><p><a href="${inviteUrl}">${inviteUrl}</a></p><p>This link expires in 48 hours.</p>`,
   });
 
-  return { success: true };
+  res.json({ success: true });
 });
 
 /**
  * Create a new user account without signing out the caller.
  * Only callable by authenticated users with role > 2.
  */
-exports.createManagedUser = onCall({ invoker: 'public' }, async (request) => {
-  if (!request.auth) {
-    throw new HttpsError('unauthenticated', 'Must be signed in.');
+exports.createManagedUser = onRequest({ cors: true }, async (req, res) => {
+  const token = req.headers.authorization?.split('Bearer ')[1];
+  if (!token) {
+    res.status(401).json({ error: 'Unauthenticated' });
+    return;
   }
 
-  const callerUid = request.auth.uid;
-  const callerDoc = await db.collection('users').doc(callerUid).get();
+  let decoded: admin.auth.DecodedIdToken;
+  try {
+    decoded = await admin.auth().verifyIdToken(token);
+  } catch {
+    res.status(401).json({ error: 'Invalid token' });
+    return;
+  }
+
+  const callerDoc = await db.collection('users').doc(decoded.uid).get();
   if (!callerDoc.exists || (callerDoc.data()?.role ?? 0) <= 2) {
-    throw new HttpsError('permission-denied', 'Insufficient role to create users.');
+    res.status(403).json({ error: 'Insufficient role to create users.' });
+    return;
   }
 
-  const { email, password, name, team } = request.data as {
+  const { email, password, name, team } = req.body as {
     email: string;
     password: string;
     name: string;
@@ -80,10 +102,12 @@ exports.createManagedUser = onCall({ invoker: 'public' }, async (request) => {
   };
 
   if (!email || !password || !name || !team) {
-    throw new HttpsError('invalid-argument', 'email, password, name, and team are required.');
+    res.status(400).json({ error: 'email, password, name, and team are required.' });
+    return;
   }
   if (password.length < 6) {
-    throw new HttpsError('invalid-argument', 'Password must be at least 6 characters.');
+    res.status(400).json({ error: 'Password must be at least 6 characters.' });
+    return;
   }
 
   let userRecord: admin.auth.UserRecord;
@@ -91,9 +115,11 @@ exports.createManagedUser = onCall({ invoker: 'public' }, async (request) => {
     userRecord = await admin.auth().createUser({ email, password, displayName: name });
   } catch (err: any) {
     if (err.code === 'auth/email-already-exists') {
-      throw new HttpsError('already-exists', 'An account with this email already exists.');
+      res.status(409).json({ error: 'An account with this email already exists.' });
+      return;
     }
-    throw new HttpsError('internal', `Failed to create auth user: ${err.message}`);
+    res.status(500).json({ error: `Failed to create auth user: ${err.message}` });
+    return;
   }
 
   await db.collection('users').doc(userRecord.uid).set({
@@ -104,5 +130,5 @@ exports.createManagedUser = onCall({ invoker: 'public' }, async (request) => {
     userID: userRecord.uid,
   });
 
-  return { uid: userRecord.uid };
+  res.json({ uid: userRecord.uid });
 });

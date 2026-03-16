@@ -1,11 +1,23 @@
-import { getFunctions, httpsCallable } from 'firebase/functions';
-import { app } from './firebase';
+import { getAuth } from 'firebase/auth';
 
-const functions = getFunctions(app);
+async function callFunction(name: string, body: object) {
+  const token = await getAuth().currentUser?.getIdToken();
+  const url = `https://us-central1-${import.meta.env.VITE_FIREBASE_PROJECT_ID}.cloudfunctions.net/${name}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
 
 export async function sendInvitation(email: string): Promise<void> {
-  const fn = httpsCallable(functions, 'sendInvitation');
-  await fn({ email });
+  await callFunction('sendInvitation', { email });
 }
 
 export async function createManagedUser(data: {
@@ -14,7 +26,5 @@ export async function createManagedUser(data: {
   name: string;
   team: string;
 }): Promise<{ uid: string }> {
-  const fn = httpsCallable<typeof data, { uid: string }>(functions, 'createManagedUser');
-  const result = await fn(data);
-  return result.data;
+  return callFunction('createManagedUser', data);
 }
