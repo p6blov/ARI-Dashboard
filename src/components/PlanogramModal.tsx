@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { Item } from '../types/item';
+import { getCabinetConfig, CabinetConfig } from '../services/cabinetService';
 
 interface PlanogramModalProps {
   cabinet: number;
@@ -16,12 +17,25 @@ export const PlanogramModal: React.FC<PlanogramModalProps> = ({
   onItemSelect,
   onClose,
 }) => {
+  const [cabinetConfig, setCabinetConfig] = useState<CabinetConfig | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      getCabinetConfig().then(setCabinetConfig);
+    }
+  }, [isOpen]);
+
+  const cabKey = `cab${cabinet}`;
+  const rows = cabinetConfig?.[cabKey]?.rows ?? 6;
+  const cols = cabinetConfig?.[cabKey]?.cols ?? 4;
+  const cabLabel = cabinetConfig?.[cabKey]?.label ?? `Cabinet ${cabinet}`;
+
   const { grid, itemsInCabinet } = useMemo(() => {
     const gridData: { [key: string]: Item[] } = {};
     const cabinetItems: Item[] = [];
 
-    for (let r = 1; r <= 6; r++) {
-      for (let c = 1; c <= 4; c++) {
+    for (let r = 1; r <= rows; r++) {
+      for (let c = 1; c <= cols; c++) {
         gridData[`${r}-${c}`] = [];
       }
     }
@@ -42,14 +56,16 @@ export const PlanogramModal: React.FC<PlanogramModalProps> = ({
     });
 
     return { grid: gridData, itemsInCabinet: cabinetItems };
-  }, [cabinet, items]);
+  }, [cabinet, items, rows, cols]);
 
   const handleItemClick = (item: Item) => {
-    // onClose();
     onItemSelect(item);
   };
 
   if (!isOpen) return null;
+
+  const colArray = Array.from({ length: cols }, (_, i) => i + 1);
+  const rowArray = Array.from({ length: rows }, (_, i) => i + 1);
 
   return (
     <>
@@ -61,10 +77,10 @@ export const PlanogramModal: React.FC<PlanogramModalProps> = ({
             <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 dark:border-yt-line bg-gray-50 dark:bg-yt-base">
               <div>
                 <h2 className="text-base font-semibold text-gray-900 dark:text-white">
-                  Cabinet {cabinet}
+                  {cabLabel}
                 </h2>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {itemsInCabinet.length} item{itemsInCabinet.length !== 1 ? 's' : ''} · 6 rows × 4 cols
+                  {itemsInCabinet.length} item{itemsInCabinet.length !== 1 ? 's' : ''} · {rows} rows × {cols} cols
                 </p>
               </div>
               <button
@@ -115,87 +131,84 @@ export const PlanogramModal: React.FC<PlanogramModalProps> = ({
 
               {/* Center — Planogram Grid */}
               <div className="flex-1 overflow-auto p-5 flex justify-start items-start">
-                <div>
-                  {/* Column headers */}
-                  <div className="flex gap-1.5 mb-1">
-                    {[1, 2, 3, 4].map((col) => (
-                      <div
-                        key={col}
-                        className="w-[90px] text-center text-xs font-semibold text-gray-400 dark:text-gray-600"
-                      >
-                        Col {col}
+                {!cabinetConfig ? (
+                  <div className="flex items-center justify-center w-full h-full">
+                    <p className="text-gray-400 text-sm">Loading layout...</p>
+                  </div>
+                ) : (
+                  <div>
+                    {/* Column headers */}
+                    <div className="flex gap-1.5 mb-1">
+                      {colArray.map((col) => (
+                        <div
+                          key={col}
+                          className="w-[90px] text-center text-xs font-semibold text-gray-400 dark:text-gray-600"
+                        >
+                          Col {col}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Grid rows */}
+                    {rowArray.map((row) => (
+                      <div key={row} className="flex items-center gap-1.5 mb-1.5">
+                        {colArray.map((col) => {
+                          const key = `${row}-${col}`;
+                          const cellItems = grid[key] || [];
+                          const hasItems = cellItems.length > 0;
+
+                          return (
+                            <div
+                              key={key}
+                              onClick={() => hasItems && handleItemClick(cellItems[0])}
+                              className={`
+                                w-[90px] h-[76px] rounded border flex flex-col p-1.5
+                                ${hasItems
+                                  ? 'border-cyan-300 dark:border-cyan-700 bg-cyan-50 dark:bg-cyan-950/30 cursor-pointer hover:bg-cyan-100 dark:hover:bg-cyan-950/50'
+                                  : 'border-dashed border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950'
+                                }
+                              `}
+                            >
+                              <span className={`text-[10px] font-bold leading-none ${
+                                hasItems
+                                  ? 'text-cyan-600 dark:text-cyan-400'
+                                  : 'text-gray-300 dark:text-gray-700'
+                              }`}>
+                                R{row}C{col}
+                              </span>
+
+                              {hasItems ? (
+                                <>
+                                  <p className="text-[11px] font-medium text-gray-800 dark:text-gray-200 mt-1 leading-tight line-clamp-2 flex-1">
+                                    {cellItems[0].name}
+                                  </p>
+                                  <span className="mt-auto self-start text-[10px] font-semibold px-1.5 py-0.5 rounded bg-cyan-500 text-white">
+                                    {cellItems.reduce((sum, i) => sum + (i.on_hand || 0), 0)}
+                                  </span>
+                                </>
+                              ) : (
+                                <span className="flex-1 flex items-center justify-center text-[10px] text-gray-300 dark:text-gray-700">
+                                  empty
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+
+                        {/* Row label */}
+                        <span className="text-xs text-gray-400 dark:text-gray-600 ml-1 w-10 shrink-0">
+                          Row {row}
+                        </span>
                       </div>
                     ))}
                   </div>
-
-                  {/* Grid rows */}
-                  {[1, 2, 3, 4, 5, 6].map((row) => (
-                    <div key={row} className="flex items-center gap-1.5 mb-1.5">
-                      {[1, 2, 3, 4].map((col) => {
-                        const key = `${row}-${col}`;
-                        const cellItems = grid[key] || [];
-                        const hasItems = cellItems.length > 0;
-
-                        return (
-                          <div
-                            key={key}
-                            onClick={() => hasItems && handleItemClick(cellItems[0])}
-                            className={`
-                              w-[90px] h-[76px] rounded border flex flex-col p-1.5
-                              ${hasItems
-                                ? 'border-cyan-300 dark:border-cyan-700 bg-cyan-50 dark:bg-cyan-950/30 cursor-pointer hover:bg-cyan-100 dark:hover:bg-cyan-950/50'
-                                : 'border-dashed border-gray-200 dark:border-yt-line bg-white dark:bg-yt-surface'
-                              }
-                            `}
-                          >
-                            <span className={`text-[10px] font-bold leading-none ${
-                              hasItems
-                                ? 'text-cyan-600 dark:text-cyan-400'
-                                : 'text-gray-300 dark:text-gray-700'
-                            }`}>
-                              R{row}C{col}
-                            </span>
-
-                            {hasItems ? (
-                              <>
-                                <p className="text-[11px] font-medium text-gray-800 dark:text-gray-200 mt-1 leading-tight line-clamp-2 flex-1">
-                                  {cellItems[0].name}
-                                </p>
-                                <span className="mt-auto self-start text-[10px] font-semibold px-1.5 py-0.5 rounded bg-cyan-500 text-white">
-                                  {cellItems.reduce((sum, i) => sum + (i.on_hand || 0), 0)}
-                                </span>
-                              </>
-                            ) : (
-                              <span className="flex-1 flex items-center justify-center text-[10px] text-gray-300 dark:text-gray-700">
-                                empty
-                              </span>
-                            )}
-                          </div>
-                        );
-                      })}
-
-                      {/* Row label */}
-                      <span className="text-xs text-gray-400 dark:text-gray-600 ml-1 w-10 shrink-0">
-                        Row {row}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                )}
               </div>
 
             </div>
           </div>
         </div>
       )}
-
-      {/* ItemDetailsModal opens after planogram closes */}
-      {/* {selectedItem && (
-        <ItemDetailsModal
-          item={selectedItem}
-          qtyCheckedOut={0}
-          onClose={() => setSelectedItem(null)}
-        />
-      )} */}
     </>
   );
 };

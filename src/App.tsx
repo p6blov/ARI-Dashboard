@@ -3,6 +3,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthPage } from './pages/AuthPage';
 import { MainPage } from './pages/MainPage';
+import { InvitePage } from './pages/InvitePage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
         <AuthProvider>
           <Routes>
             <Route path="/login" element={<AuthPage />} />
+            <Route path="/invite" element={<InvitePage />} />
             <Route
               path="/"
               element={

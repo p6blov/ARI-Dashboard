@@ -1,0 +1,56 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: get caller's role from users collection
+    function callerRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    // Users collection
+    match /users/{uid} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == uid;
+      allow write: if request.auth != null && callerRole() > 2;
+
+      // Admins (role > 2) can read any user's checked-out items
+      match /checkedOutItems/{itemId} {
+        allow read: if request.auth != null && (request.auth.uid == uid || callerRole() > 2);
+        allow write: if request.auth != null && request.auth.uid == uid;
+      }
+    }
+
+    // Inventory items
+    match /items/{itemId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+
+    // Checkout logs
+    match /checkoutLogs/{logId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+
+    // Metadata (teams, cabinets, count)
+    match /metadata/{docId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && callerRole() > 2;
+    }
+
+    // teams is public so the invite page can populate the team dropdown without auth
+    match /metadata/teams {
+      allow read: if true;
+    }
+
+    // Invitations
+    match /invitations/{token} {
+      allow read: if true;
+      allow write: if request.auth != null && callerRole() > 2;
+      // Allow the invited user to mark their own invitation as used
+      allow update: if request.auth != null
+        && resource.data.email == request.auth.token.email
+        && request.resource.data.used == true;
+    }
+  }
+}

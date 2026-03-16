@@ -3,6 +3,13 @@ import { Item } from '../types/item';
 import { formatDate, getSupplierNameFromUrl } from '../utils/helpers';
 import { PlanogramModal } from './PlanogramModal';
 import { ItemDetailsModal } from './ItemDetailsModal';
+import { useCabinetConfig } from '../hooks/useCabinetConfig';
+import { CabinetConfig } from '../services/cabinetService';
+
+function getCabinetDisplay(cabinetKey: string, config: CabinetConfig | null): string {
+  if (!config || !config[cabinetKey]) return cabinetKey;
+  return config[cabinetKey].label;
+}
 
 interface ItemsTableProps {
   items: Item[];
@@ -40,6 +47,7 @@ export const ItemsTable: React.FC<ItemsTableProps> = ({
   onSupplierFilter,
   loading = false,
 }) => {
+  const cabinetConfig = useCabinetConfig();
   const [sortField, setSortField] = useState<SortField>('name');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
@@ -123,17 +131,18 @@ export const ItemsTable: React.FC<ItemsTableProps> = ({
                 </div>
               </th>
               <th className="table-header">Quantity</th>
-              <th className="table-header">Cabinet</th>
               <th className="table-header">Location</th>
+              <th className="table-header">Position</th>
               <th className="table-header">Supplier</th>
               <th className="table-header">Updated</th>
             </tr>
           </thead>
           <tbody className="bg-white dark:bg-yt-surface divide-y divide-gray-200 dark:divide-yt-line">
             {sortedItems.map((item) => {
-              const cabinet = item.location?.[0]?.replace(/\D/g, '');
-              const row     = item.location?.[1]?.replace(/\D/g, '');
-              const col     = item.location?.[2]?.replace(/\D/g, '');
+              const cabinetKey = item.location?.[0];
+              const cabinet    = cabinetKey ? getCabinetDisplay(cabinetKey, cabinetConfig) : undefined;
+              const row        = item.location?.[1]?.replace(/\D/g, '');
+              const col        = item.location?.[2]?.replace(/\D/g, '');
 
               return (
                 <tr

@@ -6,6 +6,7 @@ import { LocationPicker } from './LocationPicker';
 import { useAuth } from '../contexts/AuthContext';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../services/firebase';
+import { useCabinetConfig } from '../hooks/useCabinetConfig';
 
 interface NewItemModalProps {
   isOpen: boolean;
@@ -27,6 +28,7 @@ export const NewItemModal: React.FC<NewItemModalProps> = ({
   onCreated,
 }) => {
   const { user } = useAuth();
+  const cabinetConfig = useCabinetConfig();
   const [formData, setFormData] = useState<ItemDraft>({
     name: '',
     description: '',
@@ -191,14 +193,14 @@ export const NewItemModal: React.FC<NewItemModalProps> = ({
                 Location
               </label>
               <LocationPicker
-                onLocationAdd={(cab, row, col) => {
-                  // Add as flat array: ["cab1", "row2", "col3"]
+                onLocationAdd={(cabKey, row, col) => {
                   setFormData({
                     ...formData,
-                    location: [...formData.location, `cab${cab}`, `row${row}`, `col${col}`],
+                    location: [...formData.location, cabKey, `row${row}`, `col${col}`],
                   });
                 }}
                 existingLocations={formData.location}
+                cabinetConfig={cabinetConfig}
               />
               <div className="flex flex-wrap gap-2 mt-2">
                 {formData.location.length > 0 && formData.location.length % 3 === 0 && (
